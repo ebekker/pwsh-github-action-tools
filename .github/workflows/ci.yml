@@ -20,7 +20,7 @@ jobs:
         shell: pwsh
         run: |
           $mm = Test-ModuleManifest -Path ./GitHubActions/GitHubActions.psd1
-          $mv = $mm.ModuleVersion
+          $mv = $mm.Version
           Write-Output "Got module manifest version: $mv"
 
           $versionBase = "$($mmV.Major).$($mmV.Minor).$($mmV.Build)"
@@ -47,7 +47,7 @@ jobs:
 
           ## Pull it back out to verify it was updated
           $mm = Test-ModuleManifest -Path ./GitHubActions/GitHubActions.psd1
-          Write-Output "Updated module manifest with version: $($mm.ModuleVersion)"
+          Write-Output "Updated module manifest with version: $($mm.Version)"
 
       - name: pester tests
         shell: pwsh
