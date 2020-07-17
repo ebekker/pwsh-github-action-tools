@@ -23,7 +23,7 @@ jobs:
           $mv = $mm.Version
           Write-Output "Got module manifest version: $mv"
 
-          $versionBase = "$($mmV.Major).$($mmV.Minor).$($mmV.Build)"
+          $versionBase = "$($mv.Major).$($mv.Minor).$($mv.Build)"
           Write-Output "Computed version base: $versionBase"
           Write-Host "::set-output name=version_base::$versionBase"
           Write-Host "::set-env name=VERSION_BASE::$versionBase"
@@ -37,8 +37,6 @@ jobs:
 
       - name: update version build
         shell: pwsh
-        env:
-          VERSION_BASE: ${{ steps.extract_version_base.outputs.version_base }}
         run: |
           $versBase = $env:VERSION_BASE
           $buildNum = $env:BUILDNUM_FOR_VERSION
