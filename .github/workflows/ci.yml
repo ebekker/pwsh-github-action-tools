@@ -1,0 +1,25 @@
+
+name: CI
+
+on:
+  push:
+  release:
+    types: published
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    
+      - name: checkout
+        uses: actions/checkout@v1
+
+      - name: pester tests
+        shell: pwsh
+        run: |
+          if (-not (Get-Module -ListAvailable Pester)) {
+            Write-Output "Pester module not found, INSTALLING..."
+            Install-Module Pester -Force
+          }
+          ./tests/GitHubActions_tests.ps1
