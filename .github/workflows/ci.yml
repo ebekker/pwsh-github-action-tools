@@ -37,6 +37,8 @@ jobs:
 
       - name: update version build
         shell: pwsh
+        env:
+          VERSION_BASE: ${{ steps.extract_version_base.outputs.version_base }}
         run: |
           $versBase = $env:VERSION_BASE
           $buildNum = $env:BUILDNUM_FOR_VERSION
