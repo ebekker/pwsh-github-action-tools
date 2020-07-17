@@ -1,7 +1,7 @@
 
 Import-Module Pester
 
-. $PSScriptRoot/../lib/ActionsCore.ps1
+Import-Module $PSScriptRoot/../GitHubActions
 
 Set-Variable -Scope Script -Option Constant -Name EOL -Value ([System.Environment]::NewLine)
 
