@@ -23,3 +23,16 @@ jobs:
             Install-Module Pester -Force
           }
           ./tests/GitHubActions_tests.ps1
+
+      - name: publish to myget
+        shell: pwsh
+        run: |
+          $nugetApiKey = ConvertTo-SecretString $env:MYGET_NUGET_API_KEY -AsPlainText
+          $nugetCred   = [pscredential]::new('ignored', $nugetApiKey)
+          Register-PSRepository -Name myget -Credential $nugetCred `
+            -SourceLocation https://www.myget.org/F/pwsh-github-action-tools/api/v2 `
+            -PublishLocation https://www.myget.org/F/pwsh-github-action-tools/api/v2/package
+          
+          Publish-Module -Path ./GitHubActions -Repository myget
+        env:
+          MYGET_NUGET_API_KEY: ${{ secrets.MYGET_NUGET_API_KEY }}
