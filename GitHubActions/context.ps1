@@ -30,7 +30,7 @@ function Get-ActionRepo {
         }
     }
 
-    $context = Get-ActionContextMap
+    $context = Get-ActionContext
     if ($context.Payload.repository) {
         Write-Verbose "Resolving Repo via Action Context"
         return @{
@@ -46,7 +46,7 @@ function Get-ActionIssue {
     [CmdletBinding()]
     param()
 
-    $context = Get-ActionContextMap
+    $context = Get-ActionContext
 
     (Get-ActionRepo) + @{
         Number = ($context.Payload.issue ?? $context.Payload.pull_request ?? $context.Payload).number
