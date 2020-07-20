@@ -15,7 +15,7 @@ function New-ActionContextMap {
     param()
 
     ## local "safe" parser for [int] values
-    $parseInt = { param($val) $int = -1; [int]::TryParse($val, [ref]$int); $int }
+    $parseInt = { param($val) $int = -1; [int]::TryParse($val, [ref]$int) | Out-Null; $int }
 
     if ($env:GITHUB_EVENT_PATH) {
         $path = $env:GITHUB_EVENT_PATH
@@ -30,7 +30,7 @@ function New-ActionContextMap {
     }
 
     @{
-        ContextResolveDate = [datetime]::Now ## For Debugging for now
+        _contextResolveDate = [datetime]::Now ## For Debugging for now
 
         EventName = $env:GITHUB_EVENT_NAME
         Sha = $env:GITHUB_SHA

@@ -23,13 +23,23 @@ jobs:
             Import-Module ./GitHubActions
 
             $context = Get-ActionContextMap -Verbose
-            Write-Host 'Resolved [context] as:'
+            $payload = $context.Payload
+            $context.Payload = $null
+
+            Write-Host '##########################################################'
+            Write-Host 'Resolved [context] minus Payload as:'
             Write-Host (ConvertTo-Json -Depth 7 $context)
 
             $repo = Get-ActionRepo -Verbose
+            Write-Host '##########################################################'
             Write-Host 'Resolved [repo] as:'
             Write-Host (ConvertTo-Json -Depth 7 $repo)
             
             $issue = Get-ActionRepo -Verbose
+            Write-Host '##########################################################'
             Write-Host 'Resolved [issue] as:'
             Write-Host (ConvertTo-Json -Depth 7 $issue)
+
+            Write-Host '##########################################################'
+            Write-Host 'Resolved [context.Payload] as:'
+            Write-Host (ConvertTo-Json -Depth 7 $payload)
