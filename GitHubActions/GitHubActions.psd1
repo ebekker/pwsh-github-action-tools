@@ -60,7 +60,7 @@
         ,'Write-ActionInfo'
         ,'Write-ActionWarning'
         ## Context-related
-        ,'Get-ActionContextMap'
+        ,'Get-ActionContext'
         ,'Get-ActionIssue'
         ,'Get-ActionRepo'
     )

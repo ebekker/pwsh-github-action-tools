@@ -1,57 +1,20 @@
 
-## This commands implement a GitHub Actions 'Context' enacapsulating
+## These commands implement a GitHub Actions 'Context' enacapsulating
 ## various elements of the running environment of the current action.
 ## It is an adaptation of the TypeScript version found here:
 ##  https://github.com/actions/toolkit/blob/master/packages/github/src/context.ts
 
 
-## For now, every access to the Action Context requires constructing a
-## new one since it's implemented purely as a nested tree of hashtables
-## so there is no way to prevent modification -- future enhancement may
-## be to re-implement as custom type with more strict, read-only members
-## so we can resolve a globally shared instance
-function New-ActionContextMap {
+function Get-ActionContext {
     [CmdletBinding()]
     param()
 
-    ## local "safe" parser for [int] values
-    $parseInt = { param($val) $int = -1; [int]::TryParse($val, [ref]$int) | Out-Null; $int }
-
-    if ($env:GITHUB_EVENT_PATH) {
-        $path = $env:GITHUB_EVENT_PATH
-        Write-Verbose "Loading event payload from [$path]"
-        if (Test-Path -PathType Leaf $path) {
-            ## Webhook payload object that triggered the workflow
-            $payload = (Get-Content -Raw $path -Encoding utf8) |
-                ConvertFrom-Json -AsHashtable
-        }
-        else {
-            Write-Warning "`GITHUB_EVENT_PATH` [$path] does not eixst"
-        }
+    $context = Get-Variable -Name actionContext -Scope script -ErrorAction SilentlyContinue
+    if (-not $context) {
+        $context = New-ActionContextMap
+        Set-Variable -Name actionContext -Scope script -Value $context
     }
-
-    @{
-        _contextResolveDate = [datetime]::Now ## For Debugging for now
-
-        EventName = $env:GITHUB_EVENT_NAME
-        Sha = $env:GITHUB_SHA
-        Ref = $env:GITHUB_REF
-        Workflow = $env:GITHUB_WORKFLOW
-        Action = $env:GITHUB_ACTION
-        Actor = $env:GITHUB_ACTOR
-        Job = $env:GITHUB_JOB
-        RunNumber = &$parseInt($env:GITHUB_RUN_NUMBER)
-        RunId = &$parseInt($env:GITHUB_RUN_ID)
-
-        Payload = $payload
-    }
-}
-
-function Get-ActionContextMap {
-    [CmdletBinding()]
-    param()
-
-    New-ActionContextMap
+    $context
 }
 
 function Get-ActionRepo {
@@ -67,7 +30,7 @@ function Get-ActionRepo {
         }
     }
 
-    $context = New-ActionContextMap
+    $context = Get-ActionContextMap
     if ($context.Payload.repository) {
         Write-Verbose "Resolving Repo via Action Context"
         return @{
@@ -83,9 +46,86 @@ function Get-ActionIssue {
     [CmdletBinding()]
     param()
 
-    $context = New-ActionContextMap
+    $context = Get-ActionContextMap
 
     (Get-ActionRepo) + @{
         Number = ($context.Payload.issue ?? $context.Payload.pull_request ?? $context.Payload).number
+    }
+}
+
+function New-ActionContextMap {
+    [CmdletBinding()]
+    param()
+
+    if ($env:GITHUB_EVENT_PATH) {
+        $path = $env:GITHUB_EVENT_PATH
+        Write-Verbose "Loading event payload from [$path]"
+        if (Test-Path -PathType Leaf $path) {
+            ## Webhook payload object that triggered the workflow
+            $payload = (Get-Content -Raw $path -Encoding utf8) |
+                ConvertFrom-Json -AsHashtable
+        }
+        else {
+            Write-Warning "`GITHUB_EVENT_PATH` [$path] does not eixst"
+        }
+    }
+    
+    $context = [pscustomobject]::new()
+    $context.PSObject.TypeNames.Insert(0, "GitHub.Context")
+    $contextProps = @{
+        _contextResolveDate = [datetime]::Now ## For Debugging for now
+
+        EventName = $env:GITHUB_EVENT_NAME
+        Sha = $env:GITHUB_SHA
+        Ref = $env:GITHUB_REF
+        Workflow = $env:GITHUB_WORKFLOW
+        Action = $env:GITHUB_ACTION
+        Actor = $env:GITHUB_ACTOR
+        Job = $env:GITHUB_JOB
+        RunNumber = ParseIntSafely $env:GITHUB_RUN_NUMBER
+        RunId = ParseIntSafely $env:GITHUB_RUN_ID
+
+        Payload = $payload
+    }
+
+    AddReadOnlyProps $context $contextProps
+
+    $context
+}
+
+function ParseIntSafely {
+    param(
+        [object]$value,
+        [int]$default=-1
+    )
+
+    [int]$int = 0
+    if (-not [int]::TryParse($value, [ref]$int)) {
+        $int = $default
+    }
+    $int
+}
+
+function AddReadOnlyProps {
+    param(
+        [pscustomobject]$psco,
+        [hashtable]$props
+    )
+
+    $props.GetEnumerator() | ForEach-Object {
+        $propName = $_.Key
+        $propValue = $_.Value
+
+        if ($propValue -and ($propValue -is [hashtable])) {
+            $newPropValue = [pscustomobject]::new()
+            AddReadOnlyProps $newPropValue $propValue
+            $propValue = $newPropValue
+        }
+
+        $psco | Add-Member -Name $propName -MemberType ScriptProperty -Value {
+            $propValue
+        }.GetNewClosure() -SecondValue {
+            Write-Warning "Cannot modify Read-only property '$($propName)'"
+        }.GetNewClosure()
     }
 }
