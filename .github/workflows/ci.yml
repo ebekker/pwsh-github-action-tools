@@ -3,8 +3,9 @@ name: CI
 
 on:
   push:
-    branches-ignore:
-      - 'context-support'
+    branches:
+      - master
+  pull_request:
   release:
     types: published
 
