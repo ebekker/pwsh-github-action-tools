@@ -11,7 +11,7 @@ function Get-ActionContext {
 
     $context = Get-Variable -Name actionContext -Scope script -ValueOnly -ErrorAction SilentlyContinue
     if (-not $context) {
-        $context = New-ActionContextMap
+        $context = BuildActionContext
         Set-Variable -Name actionContext -Scope script -Value $context
     }
     $context
@@ -53,11 +53,11 @@ function Get-ActionIssue {
     }
 }
 
-function New-ActionContextMap {
+function BuildActionContext {
     [CmdletBinding()]
     param()
 
-    Write-Verbose "Resolving Action Context"
+    Write-Verbose "Building Action Context"
 
     if ($env:GITHUB_EVENT_PATH) {
         $path = $env:GITHUB_EVENT_PATH
