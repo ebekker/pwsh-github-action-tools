@@ -22,7 +22,7 @@ jobs:
         run: |
             Import-Module ./GitHubActions
 
-            $context = Get-ActionContextMap -Verbose
+            $context = Get-ActionContext -Verbose
             $payload = $context.Payload
             $context.Payload = $null
 
