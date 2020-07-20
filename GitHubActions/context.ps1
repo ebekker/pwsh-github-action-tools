@@ -19,6 +19,7 @@ function New-ActionContextMap {
 
     if ($env:GITHUB_EVENT_PATH) {
         $path = $env:GITHUB_EVENT_PATH
+        Write-Verbose "Loading event payload from [$path]"
         if (Test-Path -PathType Leaf $path) {
             ## Webhook payload object that triggered the workflow
             $payload = (Get-Content -Raw $path -Encoding utf8) |

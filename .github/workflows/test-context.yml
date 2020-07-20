@@ -35,7 +35,7 @@ jobs:
             Write-Host 'Resolved [repo] as:'
             Write-Host (ConvertTo-Json -Depth 7 $repo)
             
-            $issue = Get-ActionRepo -Verbose
+            $issue = Get-ActionIssue -Verbose
             Write-Host '##########################################################'
             Write-Host 'Resolved [issue] as:'
             Write-Host (ConvertTo-Json -Depth 7 $issue)
