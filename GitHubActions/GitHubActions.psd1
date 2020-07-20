@@ -10,6 +10,8 @@
     ModuleVersion = '0.5.0'
     Description = 'Supports interacting with Github Actions environment'
 
+    ## Minimum version of the Windows PowerShell engine required by this module
+    PowerShellVersion = '7.0'
 
     ## Script module or binary module file associated with this manifest.
     RootModule = 'GitHubActions.psm1'
