@@ -1,0 +1,35 @@
+
+name: Test Action Context
+
+on:
+  ## Some of these will only fire on the `default` branch
+  push:
+  release:
+  issues:
+  issue_comment:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    
+      - name: checkout
+        uses: actions/checkout@v1
+
+      - name: get action context
+        shel: pwsh
+        run: |
+            Import-Module ./GitHubActions
+
+            $context = Get-ActionContextMap -Verbose
+            Write-Host 'Resolved [context] as:'
+            Write-Host (ConvertTo-Json -Depth 7 $context)
+
+            $repo = Get-ActionRepo -Verbose
+            Write-Host 'Resolved [repo] as:'
+            Write-Host (ConvertTo-Json -Depth 7 $repo)
+            
+            $issue = Get-ActionRepo -Verbose
+            Write-Host 'Resolved [issue] as:'
+            Write-Host (ConvertTo-Json -Depth 7 $issue)
