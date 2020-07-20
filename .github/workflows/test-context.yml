@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v1
 
       - name: get action context
-        shel: pwsh
+        shell: pwsh
         run: |
             Import-Module ./GitHubActions
 
