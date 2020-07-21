@@ -6,10 +6,6 @@ Import-Module $PSScriptRoot/../GitHubActions
 
 BeforeAll {
     . $PSScriptRoot/test-helpers.ps1
-
-    if (-not (Get-Variable EOL -ErrorAction Ignore)) {
-        Set-Variable -Scope Script -Option Constant -Name EOL -Value ([System.Environment]::NewLine)
-    }
 }
 
 InModuleScope GitHubActions {
@@ -62,7 +58,7 @@ InModuleScope GitHubActions {
             $context2 = Get-ActionContext
 
             $context2 | Should -Be $context1
-            $context2._contextResolveDate | Should -Be $context1._contextResolveDate
+            $context2._resolveDatetime | Should -Be $context1._resolveDatetime
         }
     }
 }

@@ -4,9 +4,7 @@ Import-Module Pester
 Import-Module $PSScriptRoot/../GitHubActions
 
 BeforeAll {
-    if (-not (Get-Variable EOL -ErrorAction Ignore)) {
-        Set-Variable -Scope Script -Option Constant -Name EOL -Value ([System.Environment]::NewLine)
-    }
+    . $PSScriptRoot/test-helpers.ps1
 }
 
 Describe 'Set-ActionVariable' {
@@ -14,7 +12,7 @@ Describe 'Set-ActionVariable' {
         @{ Name = 'varName1'  ; Value = 'varValue1' }
         @{ Name = 'var name 2'; Value = 'var value 2' }
         @{ Name = 'var,name;3'; Value = 'var,value;3'
-            Expected = "::set-env name=var%2Cname%3B3::var,value;3" }
+            Expected = "::set-env name=var%2Cname%3B3::var,value;3$EOL" }
     )
     It 'Given valid -Name and -Value, and -SkipLocal' -TestCases $testCases {
         param($Name, $Value, $Expected)
