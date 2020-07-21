@@ -65,8 +65,8 @@ Describe 'Get-ActionContext' {
         $context.Action | Should -Be $env:GITHUB_ACTION
         $context.Actor | Should -Be $env:GITHUB_ACTOR
         $context.Job | Should -Be $env:GITHUB_JOB
-        $context.RunNumber | Should -Be [int]::Parse($env:GITHUB_RUN_NUMBER)
-        $context.RunId | Should -Be [int]::Parse($env:GITHUB_RUN_ID)
+        $context.RunNumber | Should -Be ([int]::Parse($env:GITHUB_RUN_NUMBER))
+        $context.RunId | Should -Be ([int]::Parse($env:GITHUB_RUN_ID))
 
         $payldJson = $context.Payload | ConvertTo-Json -Depth 7
         $eventJson = Get-Content -Raw $eventPath -Encoding utf8
