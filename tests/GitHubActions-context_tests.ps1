@@ -7,7 +7,7 @@ if (-not (Get-Variable EOL -ErrorAction Ignore)) {
     Set-Variable -Scope Script -Option Constant -Name EOL -Value ([System.Environment]::NewLine)
 }
 
-## These two are borrowed from:
+## These two are borrowed and adapted from:
 ##   https://github.com/chriskuech/functional/blob/master/functional.psm1#L42
 function isPsCustomObject($v) {
     $v.PSTypeNames -contains 'System.Management.Automation.PSCustomObject'
@@ -19,6 +19,7 @@ function recursiveEquality($a, $b) {
             return $false
         }
         $inequalIndexes = 0..($a.Count - 1) | ? { -not (recursiveEquality $a[$_] $b[$_]) }
+        if ($inequalIndexes.Count) { Write-Verbose "Inequal Indexes: $inequalIndexes" }
         return $inequalIndexes.Count -eq 0
     }
     if ($a -is [hashtable] -and $b -is [hashtable]) {
@@ -26,6 +27,7 @@ function recursiveEquality($a, $b) {
         $inequalKeys = $a.Keys + $b.Keys `
         | Sort-Object -Unique `
         | ? { -not (recursiveEquality $a[$_] $b[$_]) }
+        if ($inequalKeys.Count) { Write-Verbose "Inequal HT Keys: $inequalKeys" }
         return $inequalKeys.Count -eq 0
     }
     if ((isPsCustomObject $a) -and (isPsCustomObject $b)) {
@@ -35,14 +37,18 @@ function recursiveEquality($a, $b) {
         | % Name `
         | Sort-Object -Unique `
         | ? { -not (recursiveEquality $a.$_ $b.$_) }
+        if ($inequalKeys.Count) { Write-Verbose "Inequal PSCO Keys: $inequalKeys" }
         return $inequalKeys.Count -eq 0
     }
-    Write-Debug "test leaves '$a' '$b'"
+    Write-Debug "test leaves '$a'($($a.GetType().FullName)) '$b'($($b.GetType().FullName))"
+
     return (($null -eq $a -and $null -eq $b) -or ($null -ne $a -and $null -ne $b -and $a.GetType() -eq $b.GetType() -and $a -eq $b))
 }
 
 Describe 'Get-ActionContext' {
     It 'Should match Real or Faked environment values' {
+        ## When run within an actual GH Workflow, these values
+        ## should already exist, otherwise we fake them out
         if (-not $env:GITHUB_EVENT_NAME) { $env:GITHUB_EVENT_NAME = 'GITHUB_EVENT_NAME' }
         if (-not $env:GITHUB_SHA) { $env:GITHUB_SHA = 'GITHUB_SHA' }
         if (-not $env:GITHUB_REF) { $env:GITHUB_REF = 'GITHUB_REF' }
@@ -68,11 +74,17 @@ Describe 'Get-ActionContext' {
         $context.RunNumber | Should -Be ([int]::Parse($env:GITHUB_RUN_NUMBER))
         $context.RunId | Should -Be ([int]::Parse($env:GITHUB_RUN_ID))
 
-        $payldJson = $context.Payload | ConvertTo-Json -Depth 7
-        $eventJson = Get-Content -Raw $eventPath -Encoding utf8
-        $payldHashtables = $payldJson | ConvertFrom-Json -AsHashtable
-        $eventHashtables = $eventJson | ConvertFrom-Json -AsHashtable
-        recursiveEquality $payldHashtables $eventHashtables | Should -Be $true
+        ## We want to canonicalize the output formats in way that we can do a deep compare
+        ## that only cares about the 'essence' of property names and values, but ignores
+        ## irrelevent differences such as exact type mismatches (int32 vs in64; array vs list)
+        $payload = $context.Payload
+        $payloaddJson = $payload | ConvertTo-Json -Depth 7
+        $eventDtlJson = Get-Content -Raw $eventPath -Encoding utf8
+
+        $eventDtlHash = $eventDtlJson | ConvertFrom-Json -AsHashtable
+        $payloaddHash = $payloaddJson | ConvertFrom-Json -AsHashtable
+        
+        recursiveEquality $eventDtlHash $payloaddHash -Verbose | Should -Be $true
     }
 
     It 'Should only construct a context once' {
