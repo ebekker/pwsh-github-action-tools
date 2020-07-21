@@ -42,31 +42,31 @@ function recursiveEquality($a, $b) {
 }
 
 Describe 'Get-ActionContext' {
-    It 'Mock environment values' {
-        $env:GITHUB_EVENT_NAME = 'GITHUB_EVENT_NAME'
-        $env:GITHUB_SHA = 'GITHUB_SHA'
-        $env:GITHUB_REF = 'GITHUB_REF'
-        $env:GITHUB_WORKFLOW = 'GITHUB_WORKFLOW'
-        $env:GITHUB_ACTION = 'GITHUB_ACTION'
-        $env:GITHUB_ACTOR = 'GITHUB_ACTOR'
-        $env:GITHUB_JOB = 'GITHUB_JOB'
-        $env:GITHUB_RUN_NUMBER = '999'
-        $env:GITHUB_RUN_ID = '888'
+    It 'Should match Real or Faked environment values' {
+        if (-not $env:GITHUB_EVENT_NAME) { $env:GITHUB_EVENT_NAME = 'GITHUB_EVENT_NAME' }
+        if (-not $env:GITHUB_SHA) { $env:GITHUB_SHA = 'GITHUB_SHA' }
+        if (-not $env:GITHUB_REF) { $env:GITHUB_REF = 'GITHUB_REF' }
+        if (-not $env:GITHUB_WORKFLOW) { $env:GITHUB_WORKFLOW = 'GITHUB_WORKFLOW' }
+        if (-not $env:GITHUB_ACTION) { $env:GITHUB_ACTION = 'GITHUB_ACTION' }
+        if (-not $env:GITHUB_ACTOR) { $env:GITHUB_ACTOR = 'GITHUB_ACTOR' }
+        if (-not $env:GITHUB_JOB) { $env:GITHUB_JOB = 'GITHUB_JOB' }
+        if (-not $env:GITHUB_RUN_NUMBER) { $env:GITHUB_RUN_NUMBER = '999' }
+        if (-not $env:GITHUB_RUN_ID) { $env:GITHUB_RUN_ID = '888' }
 
-        $eventPath = "$($PSScriptRoot)./payload-sample1.json"
+        $eventPath = "$($PSScriptRoot)/payload-sample1.json"
         $env:GITHUB_EVENT_PATH = $eventPath
 
         $context = Get-ActionContext
 
-        $context.EventName | Should -Be 'GITHUB_EVENT_NAME'
-        $context.Sha | Should -Be 'GITHUB_SHA'
-        $context.Ref | Should -Be 'GITHUB_REF'
-        $context.Workflow | Should -Be 'GITHUB_WORKFLOW'
-        $context.Action | Should -Be 'GITHUB_ACTION'
-        $context.Actor | Should -Be 'GITHUB_ACTOR'
-        $context.Job | Should -Be 'GITHUB_JOB'
-        $context.RunNumber | Should -Be 999
-        $context.RunId | Should -Be 888
+        $context.EventName | Should -Be $env:GITHUB_EVENT_NAME
+        $context.Sha | Should -Be $env:GITHUB_SHA
+        $context.Ref | Should -Be $env:GITHUB_REF
+        $context.Workflow | Should -Be $env:GITHUB_WORKFLOW
+        $context.Action | Should -Be $env:GITHUB_ACTION
+        $context.Actor | Should -Be $env:GITHUB_ACTOR
+        $context.Job | Should -Be $env:GITHUB_JOB
+        $context.RunNumber | Should -Be [int]::Parse($env:GITHUB_RUN_NUMBER)
+        $context.RunId | Should -Be [int]::Parse($env:GITHUB_RUN_ID)
 
         $payldJson = $context.Payload | ConvertTo-Json -Depth 7
         $eventJson = Get-Content -Raw $eventPath -Encoding utf8
