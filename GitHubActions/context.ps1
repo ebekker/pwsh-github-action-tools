@@ -9,10 +9,13 @@ function Get-ActionContext {
     [CmdletBinding()]
     param()
 
-    $context = Get-Variable -Name actionContext -Scope script -ValueOnly -ErrorAction SilentlyContinue
+    $context = $script:actionContext
     if (-not $context) {
-        $context = BuildActionContext
-        Set-Variable -Name actionContext -Scope script -Value $context
+        $context = [pscustomobject]::new()
+        $context.PSObject.TypeNames.Insert(0, "GitHub.Context")
+        $contextProps = BuildActionContextMap
+        AddReadOnlyProps $context $contextProps
+        $script:actionContext = $context
     }
     $context
 }
@@ -21,39 +24,33 @@ function Get-ActionRepo {
     [CmdletBinding()]
     param()
 
-    if ($env:GITHUB_REPOSITORY) {
-        Write-Verbose "Resolving Repo via env GITHUB_REPOSITORY"
-        ($owner, $repo) = $env:GITHUB_REPOSITORY -split '/',2
-        return @{
-            Owner = $owner
-            Repo = $repo
-        }
+    $repo = $script:actionContextRepo
+    if (-not $repo) {
+        $repo = [pscustomobject]::new()
+        $repo.PSObject.TypeNames.Insert(0, "GitHub.ContextRepo")
+        $repoProps = BuildActionContextRepoMap
+        AddReadOnlyProps $repo $repoProps
+        $script:actionContextRepo = $repo
     }
-
-    $context = Get-ActionContext
-    if ($context.Payload.repository) {
-        Write-Verbose "Resolving Repo via Action Context"
-        return @{
-            Owner = $context.Payload.repository.owner.login
-            Repo = $context.Payload.repository.name
-        }
-    }
-
-    throw "context.repo requires a GITHUB_REPOSITORY environment variable like 'owner/repo'"
+    $repo
 }
 
 function Get-ActionIssue {
     [CmdletBinding()]
     param()
 
-    $context = Get-ActionContext
-
-    (Get-ActionRepo) + @{
-        Number = ($context.Payload.issue ?? $context.Payload.pull_request ?? $context.Payload).number
+    $issue = $script:actionContextIssue
+    if (-not $issue) {
+        $issue = [pscustomobject]::new()
+        $issue.PSObject.TypeNames.Insert(0, "GitHub.ContextIssue")
+        $issueProps = BuildActionContextRepoMap
+        AddReadOnlyProps $issue $issueProps
+        $script:actionContextIssue = $issue
     }
+    $issue
 }
 
-function BuildActionContext {
+function BuildActionContextMap {
     [CmdletBinding()]
     param()
 
@@ -71,11 +68,9 @@ function BuildActionContext {
             Write-Warning "`GITHUB_EVENT_PATH` [$path] does not eixst"
         }
     }
-    
-    $context = [pscustomobject]::new()
-    $context.PSObject.TypeNames.Insert(0, "GitHub.Context")
-    $contextProps = @{
-        _contextResolveDate = [datetime]::Now ## For Debugging for now
+
+    @{
+        _resolveDatetime = [datetime]::Now
 
         EventName = $env:GITHUB_EVENT_NAME
         Sha = $env:GITHUB_SHA
@@ -89,10 +84,49 @@ function BuildActionContext {
 
         Payload = $payload
     }
+}
 
-    AddReadOnlyProps $context $contextProps
+function BuildActionContextRepoMap {
+    [CmdletBinding()]
+    param()
 
-    $context
+    Write-Verbose "Building Action Context Repo"
+
+    if ($env:GITHUB_REPOSITORY) {
+        Write-Verbose "Resolving Repo via env GITHUB_REPOSITORY"
+        ($owner, $repo) = $env:GITHUB_REPOSITORY -split '/',2
+        return @{
+            _resolveDatetime = [datetime]::Now
+
+            Owner = $owner
+            Repo = $repo
+        }
+    }
+
+    $context = Get-ActionContext
+    if ($context.Payload.repository) {
+        Write-Verbose "Resolving Repo via Action Context"
+        return @{
+            _resolveDatetime = [datetime]::Now
+
+            Owner = $context.Payload.repository.owner.login
+            Repo = $context.Payload.repository.name
+        }
+    }
+
+    throw "context.repo requires a GITHUB_REPOSITORY environment variable like 'owner/repo'"
+}
+
+function BuildActionContextIssueMap {
+    [CmdletBinding()]
+    param()
+
+    Write-Verbose "Building Action Context Repo"
+
+    $context = Get-ActionContext
+    (BuildActionContextRepoMap) + @{
+        Number = ($context.Payload.issue ?? $context.Payload.pull_request ?? $context.Payload).number
+    }
 }
 
 function ParseIntSafely {
