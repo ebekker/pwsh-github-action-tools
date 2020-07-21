@@ -66,13 +66,13 @@ jobs:
             }
           }
 
-          $Error.Clear()
-          ./tests/GitHubActions_tests.ps1
-          ./tests/GitHubActions-context_tests.ps1
-          if ($Error.Count) {
-            Write-Warning "Found [$($Error.Count)] errors after running Pester tests:"
-            Write-Warning ($Error | Out-Default)
-            throw "Pester tests failed"
+          Import-Module Pester
+
+          Invoke-Pester -Path ./tests/GitHubActions_tests.ps1 -ErrorVariable pesterErrs1
+          Invoke-Pester -Path ./tests/GitHubActions-context_tests.ps1 -ErrorVariable pesterErrs2
+
+          if ($pesterErrs1 -or $pesterErrs2) {
+            throw "Failed Pester tests found"
           }
 
       - name: publish to myget

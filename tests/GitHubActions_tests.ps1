@@ -3,8 +3,10 @@ Import-Module Pester
 
 Import-Module $PSScriptRoot/../GitHubActions
 
-if (-not (Get-Variable EOL -ErrorAction Ignore)) {
-    Set-Variable -Scope Script -Option Constant -Name EOL -Value ([System.Environment]::NewLine)
+BeforeAll {
+    if (-not (Get-Variable EOL -ErrorAction Ignore)) {
+        Set-Variable -Scope Script -Option Constant -Name EOL -Value ([System.Environment]::NewLine)
+    }
 }
 
 Describe 'Set-ActionVariable' {
