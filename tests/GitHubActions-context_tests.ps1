@@ -85,7 +85,10 @@ Describe 'Get-ActionContext' {
 
         $eventDtlHash = $eventDtlJson | ConvertFrom-Json -AsHashtable
         $payloaddHash = $payloaddJson | ConvertFrom-Json -AsHashtable
-        
+
+        $eventDtlHash = $eventDtlHash | ConvertTo-Json -Depth 7 | ConvertFrom-Json -AsHashtable
+        $payloaddHash = $payloaddHash | ConvertTo-Json -Depth 7 | ConvertFrom-Json -AsHashtable        
+
         recursiveEquality $eventDtlHash $payloaddHash -Verbose | Should -Be $true
     }
 

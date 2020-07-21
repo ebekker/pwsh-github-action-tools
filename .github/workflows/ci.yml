@@ -70,8 +70,8 @@ jobs:
           ./tests/GitHubActions_tests.ps1
           ./tests/GitHubActions-context_tests.ps1
           if ($Error.Count) {
-            Write-Error "Found [$($Error.Count)] errors after running Pester tests:"
-            Write-Error ($Error | Out-Default)
+            Write-Warning "Found [$($Error.Count)] errors after running Pester tests:"
+            Write-Warning ($Error | Out-Default)
             throw "Pester tests failed"
           }
 
