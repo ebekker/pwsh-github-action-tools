@@ -27,8 +27,10 @@ InModuleScope GitHubActions {
             if (-not $env:GITHUB_RUN_NUMBER) { $env:GITHUB_RUN_NUMBER = '999' }
             if (-not $env:GITHUB_RUN_ID) { $env:GITHUB_RUN_ID = '888' }
 
-            $eventPath = "$($PSScriptRoot)/payload-sample1.json"
-            $env:GITHUB_EVENT_PATH = $eventPath
+            if (-not $env:GITHUB_EVENT_PATH) {
+                $eventPath = "$($PSScriptRoot)/payload-sample1.json"
+                $env:GITHUB_EVENT_PATH = $eventPath
+            }
 
             $context = Get-ActionContext
 
@@ -47,7 +49,7 @@ InModuleScope GitHubActions {
             ## irrelevent differences such as exact type mismatches (int32 vs in64; array vs list)
             $payload = $context.Payload
 
-            $eventJson = Get-Content -Raw $eventPath -Encoding utf8
+            $eventJson = Get-Content -Raw $env:GITHUB_EVENT_PATH -Encoding utf8
             $eventProps = $eventJson | ConvertFrom-Json -AsHashtable
             $eventDetail = [pscustomobject]::new()
             AddReadOnlyProps $eventDetail $eventProps
