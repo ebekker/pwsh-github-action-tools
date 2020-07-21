@@ -121,7 +121,7 @@ function BuildActionContextIssueMap {
     [CmdletBinding()]
     param()
 
-    Write-Verbose "Building Action Context Repo"
+    Write-Verbose "Building Action Context Issue"
 
     $context = Get-ActionContext
     (BuildActionContextRepoMap) + @{
