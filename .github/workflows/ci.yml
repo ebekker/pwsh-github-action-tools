@@ -65,8 +65,14 @@ jobs:
               Install-Module $_ -Force
             }
           }
+
+          $Error.Clear()
           ./tests/GitHubActions_tests.ps1
           ./tests/GitHubActions-context_tests.ps1
+          if ($Error.Count) {
+            Write-Error "Found [$($Error.Count)] errors after running Pester tests"
+            throw "Pester tests failed"
+          }
 
       - name: publish to myget
         shell: pwsh
