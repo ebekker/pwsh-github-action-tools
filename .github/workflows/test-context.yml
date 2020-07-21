@@ -9,7 +9,7 @@ on:
   issue_comment:
 
 jobs:
-  build:
+  dump-context:
     runs-on: ubuntu-latest
     
     steps:
@@ -23,12 +23,18 @@ jobs:
             Import-Module ./GitHubActions
 
             $context = Get-ActionContext -Verbose
-            $payload = $context.Payload
-            $context.Payload = $null
+
+            ## A context object is immutable, so we make a copy through JSON
+            ## ser/deser for the purpose of nulling out the Payload which is
+            ## very deep and complex on its own so we remove it from the first
+            ## dump of context for clarity and then we'll dump just the payload
+            $contextJson = $context | ConvertTo-Json -Depth 7
+            $contextHash = $contextJson | ConvertFrom-Json -AsHashtable
+            $contextHash.Payload = $null
 
             Write-Host '##########################################################'
-            Write-Host 'Resolved [context] minus Payload as:'
-            Write-Host (ConvertTo-Json -Depth 7 $context)
+            Write-Host 'Resolved [context] WITHOUT Payload as:'
+            Write-Host (ConvertTo-Json -Depth 7 $contextHash)
 
             $repo = Get-ActionRepo -Verbose
             Write-Host '##########################################################'
@@ -42,4 +48,4 @@ jobs:
 
             Write-Host '##########################################################'
             Write-Host 'Resolved [context.Payload] as:'
-            Write-Host (ConvertTo-Json -Depth 7 $payload)
+            Write-Host (ConvertTo-Json -Depth 7 $context.Payload)
