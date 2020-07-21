@@ -55,11 +55,18 @@ jobs:
       - name: pester tests
         shell: pwsh
         run: |
-          if (-not (Get-Module -ListAvailable Pester)) {
-            Write-Output "Pester module not found, INSTALLING..."
-            Install-Module Pester -Force
+          $modulesToInstall = @(
+            'Pester'
+            'functional'
+          )
+          $modulesToInstall | ForEach-Object {
+            if (-not (Get-Module -ListAvailable $_)) {
+              Write-Output "Module [$_] not found, INSTALLING..."
+              Install-Module $_ -Force
+            }
           }
           ./tests/GitHubActions_tests.ps1
+          ./tests/GitHubActions-context_tests.ps1
 
       - name: publish to myget
         shell: pwsh
