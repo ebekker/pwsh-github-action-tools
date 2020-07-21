@@ -9,6 +9,8 @@ if (-not (Get-Variable EOL -ErrorAction Ignore)) {
 
 ## These two are borrowed and adapted from:
 ##   https://github.com/chriskuech/functional/blob/master/functional.psm1#L42
+class NULL{}
+$NULL_INST = [NULL]::new()
 function isPsCustomObject($v) {
     $v.PSTypeNames -contains 'System.Management.Automation.PSCustomObject'
 }
@@ -40,7 +42,7 @@ function recursiveEquality($a, $b) {
         if ($inequalKeys.Count) { Write-Verbose "Inequal PSCO Keys: $inequalKeys" }
         return $inequalKeys.Count -eq 0
     }
-    Write-Debug "test leaves '$a'($($a.GetType().FullName)) '$b'($($b.GetType().FullName))"
+    Write-Debug "test leaves '$a'($(($a ?? $NULL_INST).GetType().FullName)) '$b'($(($b ?? $NULL_INST).GetType().FullName))"
 
     return (($null -eq $a -and $null -eq $b) -or ($null -ne $a -and $null -ne $b -and $a.GetType() -eq $b.GetType() -and $a -eq $b))
 }
