@@ -43,7 +43,7 @@ function Get-ActionIssue {
     if (-not $issue) {
         $issue = [pscustomobject]::new()
         $issue.PSObject.TypeNames.Insert(0, "GitHub.ContextIssue")
-        $issueProps = BuildActionContextRepoMap
+        $issueProps = BuildActionContextIssueMap
         AddReadOnlyProps $issue $issueProps
         $script:actionContextIssue = $issue
     }
