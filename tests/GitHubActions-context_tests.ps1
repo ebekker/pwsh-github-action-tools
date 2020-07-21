@@ -3,7 +3,6 @@ Import-Module Pester
 
 Import-Module $PSScriptRoot/../GitHubActions
 
-
 BeforeAll {
     . $PSScriptRoot/test-helpers.ps1
 }

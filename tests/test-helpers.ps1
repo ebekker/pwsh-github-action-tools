@@ -1,8 +1,4 @@
 
-if (-not (Get-Variable -Scope script -Name EOL -ErrorAction Ignore)) {
-    $script:EOL = [System.Environment]::NewLine
-}
-
 ## These two are borrowed and adapted from:
 ##   https://github.com/chriskuech/functional/blob/master/functional.psm1#L42
 class NULL{}
