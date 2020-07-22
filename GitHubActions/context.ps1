@@ -4,7 +4,30 @@
 ## It is an adaptation of the TypeScript version found here:
 ##  https://github.com/actions/toolkit/blob/master/packages/github/src/context.ts
 
+<#
+.SYNOPSIS
+Returns details of the executing GitHub Workflow assembled from the environment.
 
+.DESCRIPTION
+The returned context is a read-only object that assembles elements from the
+executing environment of a Workflow such as environment variables and files
+and is a _PowerShelly_ adaptation of the API and interfaces defined by the
+GitHub Actions Toolkit for TypeScript.
+
+.EXAMPLE
+Import-Module GitHubActions
+
+$context = Get-ActionContext
+if ($context.EventName -eq 'push') {
+    $payload = $context.Payload
+    Write-ActionInfo "The head commit is: $($payload.head)"
+}
+
+.LINK
+https://github.com/actions/toolkit
+https://github.com/actions/toolkit/tree/main/packages/github
+https://github.com/actions/toolkit/blob/master/packages/github/src/context.ts
+#>
 function Get-ActionContext {
     [CmdletBinding()]
     param()
@@ -20,6 +43,10 @@ function Get-ActionContext {
     $context
 }
 
+<#
+.SYNOPSIS
+Returns details of the repository, including owner and repo name.
+#>
 function Get-ActionRepo {
     [CmdletBinding()]
     param()
@@ -35,6 +62,11 @@ function Get-ActionRepo {
     $repo
 }
 
+<#
+.SYNOPSIS
+Returns details of the issue associated with the workflow trigger,
+including owner and repo name, and the issue (or PR) number.
+#>
 function Get-ActionIssue {
     [CmdletBinding()]
     param()

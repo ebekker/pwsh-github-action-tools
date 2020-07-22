@@ -49,3 +49,14 @@ jobs:
             Write-Host '##########################################################'
             Write-Host 'Resolved [context.Payload] as:'
             Write-Host (ConvertTo-Json -Depth 7 $context.Payload)
+
+      - name: try docs example
+        shell: pwsh
+        run: |
+          Import-Module ./GitHubActions
+
+          $context = Get-ActionContext
+          if ($context.EventName -eq 'push') {
+              $payload = $context.Payload
+              Write-ActionInfo "The head commit is: $($payload.head)"
+          }
