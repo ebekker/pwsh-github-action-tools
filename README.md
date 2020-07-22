@@ -5,9 +5,10 @@ Supporting tools for implementing GitHub Actions in PowerShell
 ---
 
 [![GitHub Workflow - CI](https://github.com/ebekker/pwsh-github-action-tools/workflows/CI/badge.svg)](https://github.com/ebekker/pwsh-github-action-tools/actions?workflow=CI)
-[![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/GitHubActions)](https://www.powershellgallery.com/packages/GitHubActions)
+[![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/GitHubActions?label=release%20%28PSGallery%29)](https://www.powershellgallery.com/packages/GitHubActions)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/ebekker/pwsh-github-action-tools)](https://github.com/ebekker/pwsh-github-action-tools/releases/latest/download/GitHubActions.zip)
 [![docs for GitHubActions](https://img.shields.io/badge/docs-GitHubActions-blueviolet)](docs/GitHubActions/README.md)
+[![MyGet (with prereleases)](https://img.shields.io/myget/pwsh-github-action-tools/vpre/GitHubActions?label=pre-release%20%28MyGet%29)](https://www.myget.org/feed/pwsh-github-action-tools/package/nuget/GitHubActions)
 
 ---
 
