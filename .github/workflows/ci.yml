@@ -3,6 +3,9 @@ name: CI
 
 on:
   push:
+    branches:
+      - master
+  pull_request:
   release:
     types: published
 
@@ -52,11 +55,25 @@ jobs:
       - name: pester tests
         shell: pwsh
         run: |
-          if (-not (Get-Module -ListAvailable Pester)) {
-            Write-Output "Pester module not found, INSTALLING..."
-            Install-Module Pester -Force
+          $modulesToInstall = @(
+            'Pester'
+            'functional'
+          )
+          $modulesToInstall | ForEach-Object {
+            if (-not (Get-Module -ListAvailable $_)) {
+              Write-Output "Module [$_] not found, INSTALLING..."
+              Install-Module $_ -Force
+            }
           }
-          ./tests/GitHubActions_tests.ps1
+
+          Import-Module Pester
+
+          Invoke-Pester -Path ./tests/GitHubActions_tests.ps1 -ErrorVariable pesterErrs1
+          Invoke-Pester -Path ./tests/GitHubActions-context_tests.ps1 -ErrorVariable pesterErrs2
+
+          if ($pesterErrs1 -or $pesterErrs2) {
+            throw "Failed Pester tests found"
+          }
 
       - name: publish to myget
         shell: pwsh

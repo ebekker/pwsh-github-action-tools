@@ -1,5 +1,5 @@
-# Copyright (c) Eugene Bekker. All rights reserved.
-# Licensed under the MIT License.
+## Copyright (c) Eugene Bekker. All rights reserved.
+## Licensed under the MIT License.
 
 @{
     GUID = '35b95976-97b3-473d-b132-f6165981f0d2'
@@ -10,35 +10,40 @@
     ModuleVersion = '0.5.0'
     Description = 'Supports interacting with Github Actions environment'
 
-    # Minimum version of the Windows PowerShell engine required by this module
-    PowerShellVersion = '4.0'
+    ## Minimum version of the Windows PowerShell engine required by this module
+    PowerShellVersion = '7.0'
 
-    # Script module or binary module file associated with this manifest.
+    ## Script module or binary module file associated with this manifest.
     RootModule = 'GitHubActions.psm1'
 
-    # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
+    NestedModules = @(
+        ,'context.ps1'
+    )
+
+    ## Private data to pass to the module specified in RootModule/ModuleToProcess. This may
+    ## also contain a PSData hashtable with additional module metadata used by PowerShell.
     PrivateData = @{
 
         PSData = @{
 
-            # Tags applied to this module. These help with module discovery in online galleries.
+            ## Tags applied to this module. These help with module discovery in online galleries.
             Tags = @('GitHub', 'Actions', 'CI')
 
-            # A URL to the license for this module.
-            LicenseUri = 'https://github.com/ebekker/pwsh-github-action-tools/LICENSE'
+            ## A URL to the license for this module.
+            LicenseUri = 'https://github.com/ebekker/pwsh-github-action-tools/blob/master/LICENSE'
 
-            # A URL to the main website for this project.
+            ## A URL to the main website for this project.
             ProjectUri = 'https://github.com/ebekker/pwsh-github-action-tools'
 
-            # A URL to an icon representing this module.
+            ## A URL to an icon representing this module.
             # IconUri = ''
 
-            # ReleaseNotes of this module
+            ## ReleaseNotes of this module
             ReleaseNotes = 'https://github.com/ebekker/pwsh-github-action-base/releases/'
         }
     }
 
-    # Functions to export from this module
+    ## Functions to export from this module
     FunctionsToExport = @(
         ,'Add-ActionPath'
         ,'Add-ActionSecretMask'
@@ -54,6 +59,10 @@
         ,'Write-ActionError'
         ,'Write-ActionInfo'
         ,'Write-ActionWarning'
+        ## Context-related
+        ,'Get-ActionContext'
+        ,'Get-ActionIssue'
+        ,'Get-ActionRepo'
     )
 
     ## Aliases to export from this module
