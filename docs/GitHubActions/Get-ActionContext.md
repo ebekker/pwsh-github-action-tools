@@ -37,7 +37,7 @@ OUTPUTS
     $context = Get-ActionContext
     if ($context.EventName -eq 'push') {
         $payload = $context.Payload
-        Write-ActionInfo "The head commit is: $($payload.head_commit)"
+        Write-ActionInfo "The head commit is: $($payload.head_commit | ConvertTo-Json)"
     }
     
     
