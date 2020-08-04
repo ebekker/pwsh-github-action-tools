@@ -23,7 +23,7 @@ pwsh -c @'
         Name = ""Row""
         Expression = {
             $n = $_.Name.Trim()
-            $s = $_.Synopsis.Trim()
+            $s = $_.Synopsis.Trim().Replace(""`r"",'').Replace(""`n"", '<br/>')
             ""| [$($n)]($($n).md) | $($s) |""
         }
     } } | Select-Object -Expand Row  >> $modDocs/README.md

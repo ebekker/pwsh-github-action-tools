@@ -115,7 +115,7 @@ jobs:
           cd GitHubActions
           Compress-Archive -DestinationPath ../GitHubActions.zip -Path ./*
 
-      - name: publish to myget
+      - name: publish to powershell gallery
         shell: pwsh
         env:
           PSGALLERY_NUGET_API_KEY: ${{ secrets.PSGALLERY_NUGET_API_KEY }}

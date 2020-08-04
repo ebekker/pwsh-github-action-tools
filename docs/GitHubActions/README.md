@@ -10,8 +10,7 @@ Supports interacting with Github Actions environment
 | [Get-ActionContext](Get-ActionContext.md) | Returns details of the executing GitHub Workflow assembled from the environment. |
 | [Get-ActionInput](Get-ActionInput.md) | Gets the value of an input.  The value is also trimmed. |
 | [Get-ActionInputs](Get-ActionInputs.md) | Returns a map of all the available inputs and their values. |
-| [Get-ActionIssue](Get-ActionIssue.md) | Returns details of the issue associated with the workflow trigger,
-including owner and repo name, and the issue (or PR) number. |
+| [Get-ActionIssue](Get-ActionIssue.md) | Returns details of the issue associated with the workflow trigger,<br/>including owner and repo name, and the issue (or PR) number. |
 | [Get-ActionRepo](Get-ActionRepo.md) | Returns details of the repository, including owner and repo name. |
 | [Invoke-ActionWithinOutputGroup](Invoke-ActionWithinOutputGroup.md) | Executes the argument script block within an output group. |
 | [Set-ActionFailed](Set-ActionFailed.md) | TODO:  NOT IMPLEMENTED! |
