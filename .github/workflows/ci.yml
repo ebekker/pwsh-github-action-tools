@@ -129,7 +129,7 @@ jobs:
             conclusion = 'neutral'
             output     = @{
                 title   = 'Test Run:  GitHubActions_tests'
-                summary = "This run completed at `${[datetime]::Now}`"
+                summary = "This run completed at ``${[datetime]::Now}``"
                 text    = $reportData1
             }
           }
