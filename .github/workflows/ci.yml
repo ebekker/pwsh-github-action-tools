@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - master
+      - pester-test-report
   pull_request:
   release:
     types: published
@@ -71,9 +72,72 @@ jobs:
           Invoke-Pester -Path ./tests/GitHubActions_tests.ps1 -ErrorVariable pesterErrs1
           Invoke-Pester -Path ./tests/GitHubActions-context_tests.ps1 -ErrorVariable pesterErrs2
 
-          if ($pesterErrs1 -or $pesterErrs2) {
-            throw "Failed Pester tests found"
+      - name: pester tests reports
+      if: ${{ !cancelled() }}
+      continue-on-error: true
+      shell: pwsh
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+          Import-Module Pester
+          Import-Module ./GitHubActions
+
+          if (-not (Test-Path ./_IGNORE)) {
+            mkdir ./_IGNORE
           }
+          Invoke-Pester -Path ./tests/GitHubActions_tests.ps1 -ErrorVariable pesterErrs1 `
+              -OutputFile ./_IGNORE/GitHubActions_tests.xml
+          Invoke-Pester -Path ./tests/GitHubActions-context_tests.ps1 -ErrorVariable pesterErrs2 `
+              -OutputFile ./_IGNORE/GitHubActions-context_tests.xml
+
+          ./tools/test-report/nunitxml2md.ps1 -Verbose -xmlFile ./_IGNORE/GitHubActions_tests.xml
+          ./tools/test-report/nunitxml2md.ps1 -Verbose -xmlFile ./_IGNORE/GitHubActions-context_tests.xml
+          $reportData1 = [System.IO.File]::ReadAllText("$PWD/./_IGNORE/GitHubActions_tests.md")
+          $reportData2 = [System.IO.File]::ReadAllText("$PWD/./_IGNORE/GitHubActions-context_tests.md")
+
+          ## Publishing in GH Workflow
+
+          $ghToken = $env:GITHUB_TOKEN
+          $ctx = Get-ActionContext
+          $repo = Get-ActionRepo
+
+          Write-ActionInfo "Resolving REF"
+          $ref = $ctx.Sha
+          if ($ctx.EventName -eq 'pull_request') {
+              Write-ActionInfo "Resolving PR REF"
+              $ref = $ctx.Payload.pull_request.head.sha
+              if (-not $ref) {
+                  Write-ActionInfo "Resolving PR REF as AFTER"
+                  $ref = $ctx.Payload.after
+              }
+          }
+          if (-not $ref) {
+              Write-ActionError "Failed to resolve REF"
+              exit 1
+          }
+
+          Write-ActionInfo "Adding Check Run"
+          $url = 'https://api.github.com/repos/PKISharp/ACMESharpCore/check-runs'
+          $hdr = @{
+              Accept = 'application/vnd.github.antiope-preview+json'
+              Authorization = "token $ghToken"
+          }
+          $bdy = @{
+            name       = 'TESTS: GitHubActions_tests'
+            head_sha   = $ref
+            status     = 'completed'
+            conclusion = 'neutral'
+            output     = @{
+                title   = 'Test Run:  GitHubActions_tests'
+                summary = 'This run completed at `${[datetime]::Now}`'
+                text    = $reportData1
+            }
+          }
+          Invoke-WebRequest -Headers $hdr $url -Method Post -Body ($bdy | ConvertTo-Json)
+          $bdy.name = 'TESTS: GitHubActions-context_tests'
+          $bdy.output.title = 'Test Run:  GitHubActions-context_tests'
+          $bdy.output.text = $reportData2
+          Invoke-WebRequest -Headers $hdr $url -Method Post -Body ($bdy | ConvertTo-Json)
 
       - name: publish to myget
         shell: pwsh
