@@ -117,7 +117,7 @@ jobs:
           }
 
           Write-ActionInfo "Adding Check Run"
-          $url = 'https://api.github.com/repos/PKISharp/ACMESharpCore/check-runs'
+          $url = 'https://api.github.com/repos/ebekker/pwsh-github-action-tools/check-runs'
           $hdr = @{
               Accept = 'application/vnd.github.antiope-preview+json'
               Authorization = "token $ghToken"
@@ -129,7 +129,7 @@ jobs:
             conclusion = 'neutral'
             output     = @{
                 title   = 'Test Run:  GitHubActions_tests'
-                summary = 'This run completed at `${[datetime]::Now}`'
+                summary = "This run completed at `${[datetime]::Now}`"
                 text    = $reportData1
             }
           }
