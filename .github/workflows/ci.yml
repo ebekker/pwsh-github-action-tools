@@ -73,12 +73,12 @@ jobs:
           Invoke-Pester -Path ./tests/GitHubActions-context_tests.ps1 -ErrorVariable pesterErrs2
 
       - name: pester tests reports
-      if: ${{ !cancelled() }}
-      continue-on-error: true
-      shell: pwsh
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
           Import-Module Pester
           Import-Module ./GitHubActions
 
