@@ -52,7 +52,11 @@ jobs:
           $mm = Test-ModuleManifest -Path ./GitHubActions/GitHubActions.psd1
           Write-Output "Updated module manifest with version: $($mm.Version)"
 
-      - name: pester tests
+      ## We have to run the Pester tests manually because the `pester-tests-report` Action
+      ## actually uses our GitHubActions module internally, and produces a conflict due to
+      ## multiple same-named module scripts when the Action tries to run our tests itself
+      - name: pester tests manually
+        id: pesterTests
         shell: pwsh
         run: |
           $modulesToInstall = @(
@@ -60,20 +64,40 @@ jobs:
             'functional'
           )
           $modulesToInstall | ForEach-Object {
-            if (-not (Get-Module -ListAvailable $_)) {
+            if (-not (Get-Module -ListAvailable -All $_)) {
               Write-Output "Module [$_] not found, INSTALLING..."
               Install-Module $_ -Force
             }
           }
 
           Import-Module Pester
+          Import-Module ./GitHubActions
 
-          Invoke-Pester -Path ./tests/GitHubActions_tests.ps1 -ErrorVariable pesterErrs1
-          Invoke-Pester -Path ./tests/GitHubActions-context_tests.ps1 -ErrorVariable pesterErrs2
+          $test_results_dir = Join-Path $PWD _TMP
+          $test_results_path = Join-Path $test_results_dir test-results.nunit.xml
+          $result_clixml_path = Join-Path $test_results_dir pester-result.xml
 
-          if ($pesterErrs1 -or $pesterErrs2) {
-            throw "Failed Pester tests found"
+          if (-not (Test-Path $test_results_dir)) {
+            mkdir $test_results_dir
           }
+
+          $pesterResult = Invoke-Pester -PassThru -OutputFile $test_results_path -Path tests
+          Export-Clixml -InputObject $pesterResult -Path $result_clixml_path
+
+          Set-ActionOutput -Name test_results_path -Value $test_results_path
+          Set-ActionOutput -Name result_clixml_path -Value $result_clixml_path
+
+      - name: pester tests report
+        uses: zyborg/pester-tests-report@v1.3.0
+        with:
+          test_results_path: ${{ steps.pesterTests.outputs.test_results_path }}
+          result_clixml_path: ${{ steps.pesterTests.outputs.result_clixml_path }}
+          report_name: action_tools_tests
+          report_title: PWSH GitHub Action Tools Tests
+          gist_name: pwsh-github-action-tools_tests.md
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          gist_token: ${{ secrets.GIST_TOKEN }}
+          gist_badge_label: 'Tested @ %ExecutedAt%'
 
       - name: publish to myget
         shell: pwsh

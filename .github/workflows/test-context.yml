@@ -4,6 +4,8 @@ name: Test Action Context
 on:
   ## Some of these will only fire on the `default` branch
   push:
+    branches:
+      - master
   release:
   issues:
   issue_comment:
