@@ -61,14 +61,14 @@ jobs:
             'functional'
           )
           $modulesToInstall | ForEach-Object {
-            if (-not (Get-Module -ListAvailable $_)) {
+            if (-not (Get-Module -ListAvailable -All $_)) {
               Write-Output "Module [$_] not found, INSTALLING..."
               Install-Module $_ -Force
             }
           }
 
       - name: pester tests
-        uses: zyborg/pester-tests-report@v1.2.0
+        uses: zyborg/pester-tests-report@v1.2.1
         with:
           include_paths: ./tests
           exclude_tags: SkipCI
