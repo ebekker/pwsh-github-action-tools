@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - master
-      - pester-test-report
   pull_request:
   release:
     types: published
@@ -89,7 +88,7 @@ jobs:
           Set-ActionOutput -Name result_clixml_path -Value $result_clixml_path
 
       - name: pester tests report
-        uses: zyborg/pester-tests-report@v1.2.2
+        uses: zyborg/pester-tests-report@v1.3.0
         with:
           test_results_path: ${{ steps.pesterTests.outputs.test_results_path }}
           result_clixml_path: ${{ steps.pesterTests.outputs.result_clixml_path }}
