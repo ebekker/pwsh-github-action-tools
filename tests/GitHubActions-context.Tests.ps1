@@ -8,6 +8,7 @@ BeforeAll {
 }
 
 InModuleScope GitHubActions {
+
     Describe 'Get-ActionContext' {
         It 'Should match Real or Faked environment values' {
             ## When run within an actual GH Workflow, these values
@@ -48,6 +49,12 @@ InModuleScope GitHubActions {
             $eventProps = $eventJson | ConvertFrom-Json -AsHashtable
             $eventDetail = [pscustomobject]::new()
             AddReadOnlyProps $eventDetail $eventProps
+
+            ## Weird bug
+            if (-not (Get-Command recursiveEquality -ErrorAction SilentlyContinue)) {
+                Write-Warning "test-helpers.ps1 missing, trying to resolve"
+                . $PSScriptRoot/test-helpers.ps1
+            }
 
             recursiveEquality $eventDetail $payload -Verbose | Should -Be $true
         }

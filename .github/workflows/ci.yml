@@ -98,7 +98,7 @@ jobs:
           gist_name: pwsh-github-action-tools_tests.md
           github_token: ${{ secrets.GITHUB_TOKEN }}
           gist_token: ${{ secrets.GIST_TOKEN }}
-          gist_badge_label: '%ExecutedAt%'
+          gist_badge_label: 'Tested @ %ExecutedAt%'
 
       - name: publish to myget
         shell: pwsh
