@@ -140,12 +140,20 @@ Describe 'Write-ActionError' {
         $output = Write-ActionError 'This is a sample message'
         $output | Should -Be "::error::This is a sample message$EOL"
     }
+    It 'Given file details' {
+        $output = Write-ActionError 'Sample message with file' -File 'sample.txt' -Line 10 -Col 5
+        $output | Should -Be "::error file=sample.txt,line=10,col=5::Sample message with file$EOL"
+    }
 }
 
 Describe 'Write-ActionWarning' {
     It 'Given a valid -Message' {
         $output = Write-ActionWarning 'This is a sample message'
         $output | Should -Be "::warning::This is a sample message$EOL"
+    }
+    It 'Given file details' {
+        $output = Write-ActionWarning 'Sample message with file' -File 'sample.txt' -Line 10 -Col 5
+        $output | Should -Be "::warning file=sample.txt,line=10,col=5::Sample message with file$EOL"
     }
 }
 

@@ -162,7 +162,7 @@ Debug message
  #>
 function Write-ActionDebug {
     param(
-        [string]$Message=""
+        [string]$Message=''
     )
 
     Send-ActionCommand debug $Message
@@ -176,10 +176,18 @@ Error issue message
  #>
  function Write-ActionError {
     param(
-        [string]$Message=""
+        [string]$Message='',
+        [string]$File='',
+        [int]$Line=-1,
+        [int]$Col=-1
     )
 
-    Send-ActionCommand error $Message
+    $optArgs = [ordered]@{}
+    if ($File)       { $optArgs.file = $File }
+    if ($Line -ge 0) { $optArgs.line = $Line }
+    if ($Col -ge 0)  { $optArgs.col  = $col }
+
+    Send-ActionCommand error $Message -Properties $optArgs
 }
 
 <#
@@ -190,10 +198,18 @@ Warning issue message
  #>
  function Write-ActionWarning {
     param(
-        [string]$Message=""
+        [string]$Message='',
+        [string]$File='',
+        [int]$Line=-1,
+        [int]$Col=-1
     )
 
-    Send-ActionCommand warning $Message
+    $optArgs = [ordered]@{}
+    if ($File)       { $optArgs.file = $File }
+    if ($Line -ge 0) { $optArgs.line = $Line }
+    if ($Col -ge 0)  { $optArgs.col  = $col }
+
+    Send-ActionCommand warning $Message -Properties $optArgs
 }
 
 <#
@@ -204,7 +220,7 @@ Info message
  #>
  function Write-ActionInfo {
     param(
-        [string]$Message=""
+        [string]$Message=''
     )
 
     ## Hmm, which one??
@@ -290,7 +306,7 @@ function Send-ActionCommand {
         [string]$Command,
 
         [Parameter(ParameterSetName="WithProps", Position=1, Mandatory)]
-        [hashtable]$Properties,
+        [System.Collections.IDictionary]$Properties,
 
         [Parameter(ParameterSetName="WithProps", Position=2)]
         [Parameter(ParameterSetName="SkipProps", Position=1)]
@@ -304,10 +320,11 @@ function Send-ActionCommand {
     $cmdStr = "$($CMD_STRING)$($Command)"
     if ($Properties.Count -gt 0) {
         $cmdStr += ' '
-        foreach ($key in $Properties.Keys) {
-            $val = ConvertTo-EscapedValue -Value $Properties[$key]
-            $cmdStr += "$($key)=$($val)"
-        }
+        $cmdStr += ($Properties.GetEnumerator() | % {
+            $key = $_.Key
+            $val = ConvertTo-EscapedValue -Value $_.Value
+            "$($key)=$($val)"
+        }) -join ','
     }
     $cmdStr += $CMD_STRING
     $cmdStr += ConvertTo-EscapedData -Value $Message
