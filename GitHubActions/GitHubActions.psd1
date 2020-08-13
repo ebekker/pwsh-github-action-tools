@@ -7,7 +7,7 @@
     CompanyName = 'https://github.com/ebekker/pwsh-github-action-tools'
     Copyright = 'Copyright (C) Eugene Bekker.  All rights reserved.'
 
-    ModuleVersion = '0.6.0'
+    ModuleVersion = '0.7.0'
     Description = 'Supports interacting with Github Actions environment'
 
     ## Minimum version of the Windows PowerShell engine required by this module

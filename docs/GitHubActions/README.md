@@ -1,5 +1,5 @@
 
-# GitHubActions _(0.6.0)_
+# GitHubActions _(0.7.0)_
 Supports interacting with Github Actions environment
 | Cmdlet | Synopsis |
 |-|-|
@@ -13,7 +13,7 @@ Supports interacting with Github Actions environment
 | [Get-ActionIssue](Get-ActionIssue.md) | Returns details of the issue associated with the workflow trigger,<br/>including owner and repo name, and the issue (or PR) number. |
 | [Get-ActionRepo](Get-ActionRepo.md) | Returns details of the repository, including owner and repo name. |
 | [Invoke-ActionWithinOutputGroup](Invoke-ActionWithinOutputGroup.md) | Executes the argument script block within an output group. |
-| [Set-ActionFailed](Set-ActionFailed.md) | TODO:  NOT IMPLEMENTED! |
+| [Set-ActionFailed](Set-ActionFailed.md) | Used as a shortcut for `Write-ActionError` and `exit 1` |
 | [Set-ActionOutput](Set-ActionOutput.md) | Sets the value of an output. |
 | [Set-ActionVariable](Set-ActionVariable.md) | Sets env variable for this action and future actions in the job. |
 | [Write-ActionDebug](Write-ActionDebug.md) | Writes debug message to user log. |

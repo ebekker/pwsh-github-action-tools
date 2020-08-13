@@ -37,6 +37,7 @@ OUTPUTS
     
     
 RELATED LINKS
+    https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-a-debug-message
 
 ```
 

@@ -46,6 +46,7 @@ OUTPUTS
     
     
 RELATED LINKS
+    https://github.com/actions/toolkit/tree/a6e72497764b1cf53192eb720f551d7f0db3a4b4/packages/core#logging
 
 ```
 
