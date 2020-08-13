@@ -14,6 +14,8 @@ The name of the variable to set
 The value of the variable
 .PARAMETER SkipLocal
 Do not set variable in current action's/step's environment.
+.LINK
+https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
 #>
 function Set-ActionVariable {
     param(
@@ -57,6 +59,8 @@ Prepends path to the PATH (for this action and future actions).
 The new path to add.
 .PARAMETER SkipLocal
 Do not prepend path to current action's/step's environment PATH.
+.LINK
+https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#adding-a-system-path
 #>
 function Add-ActionPath {
     param(
@@ -88,6 +92,8 @@ Gets the value of an input.  The value is also trimmed.
 Name of the input to get
 .PARAMETER Required
 Whether the input is required. If required and not present, will throw.
+.LINK
+https://github.com/actions/toolkit/tree/a6e72497764b1cf53192eb720f551d7f0db3a4b4/packages/core#inputsoutputs
 #>
 function Get-ActionInput {
     param(
@@ -111,6 +117,8 @@ Returns a map of all the available inputs and their values.
 .DESCRIPTION
 Lookups in the returned map are case-insensitive, as per the
 behavior of individual input lookup.
+.LINK
+https://github.com/actions/toolkit/tree/a6e72497764b1cf53192eb720f551d7f0db3a4b4/packages/core#inputsoutputs
 #>
 function Get-ActionInputs {
     ## This makes sure the returned map looks up keys case-insensitively
@@ -131,6 +139,8 @@ Sets the value of an output.
 Name of the output to set.
 .PARAMETER Value
 Value to store.
+.LINK
+https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-output-parameter
 #>
 function Set-ActionOutput {
     param(
@@ -148,6 +158,8 @@ function Set-ActionOutput {
 <#
 .SYNOPSIS
 Used as a shortcut for `Write-ActionError` and `exit 1`
+.LINK
+https://github.com/actions/toolkit/tree/a6e72497764b1cf53192eb720f551d7f0db3a4b4/packages/core#exit-codes
 #>
 function Set-ActionFailed {
     param(
@@ -163,6 +175,8 @@ function Set-ActionFailed {
 Writes debug message to user log.
 .PARAMETER Message
 Debug message
+.LINK
+https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-a-debug-message
  #>
 function Write-ActionDebug {
     param(
@@ -177,6 +191,8 @@ function Write-ActionDebug {
 Adds an error issue.
 .PARAMETER Message
 Error issue message
+.LINK
+https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-error-message
  #>
  function Write-ActionError {
     param(
@@ -199,6 +215,8 @@ Error issue message
 Adds a warning issue.
 .PARAMETER Message
 Warning issue message
+.LINK
+https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-a-warning-message
  #>
  function Write-ActionWarning {
     param(
@@ -239,6 +257,8 @@ Begin an output group.
 Output until the next `groupEnd` will be foldable in this group.
 .PARAMETER Name
 Name of the output group.
+.LINK
+https://github.com/actions/toolkit/tree/a6e72497764b1cf53192eb720f551d7f0db3a4b4/packages/core#logging
  #>
  function Enter-ActionOutputGroup {
     param(
@@ -252,6 +272,8 @@ Name of the output group.
 <#
 .SYNOPSIS
 End an output group.
+.LINK
+https://github.com/actions/toolkit/tree/a6e72497764b1cf53192eb720f551d7f0db3a4b4/packages/core#logging
  #>
  function Exit-ActionOutputGroup {
     Send-ActionCommand endgroup
@@ -264,6 +286,8 @@ Executes the argument script block within an output group.
 Name of the output group.
 .PARAMETER ScriptBlock
 Script block to execute in between opening and closing output group.
+.LINK
+https://github.com/actions/toolkit/tree/a6e72497764b1cf53192eb720f551d7f0db3a4b4/packages/core#logging
 #>
 function Invoke-ActionWithinOutputGroup {
     param(
