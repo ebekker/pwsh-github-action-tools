@@ -147,11 +147,15 @@ function Set-ActionOutput {
 
 <#
 .SYNOPSIS
-TODO:  NOT IMPLEMENTED!
+Used as a shortcut for `Write-ActionError` and `exit 1`
 #>
 function Set-ActionFailed {
-    ## Not implemented for now...
-    throw "Not Implemented"
+    param(
+        [string]$Message=''
+    )
+
+    Write-ActionError -Message $Message
+    exit 1
 }
 
 <#

@@ -164,6 +164,14 @@ Describe 'Write-ActionInfo' {
     }
 }
 
+Describe 'Set-ActionFailed' {
+    It 'Given a valid -Message' {
+        $output =  pwsh -c "ipmo $PSScriptRoot/../GitHubActions; Set-ActionFailed 'failed message'"
+        $output[0] | Should -Be "::error::failed message"
+        $LASTEXITCODE | Should -Be 1
+    }
+}
+
 Describe 'Enter-ActionOutputGroup' {
     It 'Given a valid -Name' {
         $output = Enter-ActionOutputGroup 'Sample Group'
