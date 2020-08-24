@@ -5,7 +5,8 @@ NAME
     Get-ActionInput
     
 SYNOPSIS
-    Gets the value of an input.  The value is also trimmed.
+    Gets the value of an input. The value is also trimmed.
+    Equivalent of `core.getInput(name)`.
     
     
 SYNTAX
@@ -17,7 +18,7 @@ DESCRIPTION
 
 PARAMETERS
     -Name <String>
-        Name of the input to get
+        Name of the input to get.
         
         Required?                    true
         Position?                    1
@@ -43,10 +44,13 @@ PARAMETERS
 INPUTS
     
 OUTPUTS
+    System.String
+    
     
     
 RELATED LINKS
-    https://github.com/actions/toolkit/tree/a6e72497764b1cf53192eb720f551d7f0db3a4b4/packages/core#inputsoutputs
+    https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idstepswith
+    https://github.com/actions/toolkit/tree/7f7e22a9406f546f9084e9eb7a4e541a3563f92b/packages/core#inputsoutputs
 
 ```
 

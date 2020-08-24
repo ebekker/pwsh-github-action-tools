@@ -1,15 +1,16 @@
-# Add-ActionSecretMask
+# Add-ActionSecret
 ```
 
 NAME
-    Add-ActionSecretMask
+    Add-ActionSecret
     
 SYNOPSIS
     Registers a secret which will get masked from logs.
+    Equivalent of `core.setSecret(secret)`.
     
     
 SYNTAX
-    Add-ActionSecretMask [-Secret] <String> [<CommonParameters>]
+    Add-ActionSecret [-Secret] <String> [<CommonParameters>]
     
     
 DESCRIPTION
@@ -37,6 +38,8 @@ OUTPUTS
     
     
 RELATED LINKS
+    https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#masking-a-value-in-log
+    https://github.com/actions/toolkit/tree/7f7e22a9406f546f9084e9eb7a4e541a3563f92b/packages/core#setting-a-secret
 
 ```
 

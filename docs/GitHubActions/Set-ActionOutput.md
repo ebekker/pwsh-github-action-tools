@@ -6,10 +6,11 @@ NAME
     
 SYNOPSIS
     Sets the value of an output.
+    Equivalent of `core.setOutput(name, value)`.
     
     
 SYNTAX
-    Set-ActionOutput [-Name] <String> [-Value] <String> [<CommonParameters>]
+    Set-ActionOutput [-Name] <String> [-Value] <Object> [<CommonParameters>]
     
     
 DESCRIPTION
@@ -25,8 +26,8 @@ PARAMETERS
         Accept pipeline input?       false
         Accept wildcard characters?  false
         
-    -Value <String>
-        Value to store.
+    -Value <Object>
+        Value to store. Non-string values will be converted to a string via ConvertTo-Json.
         
         Required?                    true
         Position?                    2
@@ -47,6 +48,7 @@ OUTPUTS
     
 RELATED LINKS
     https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-output-parameter
+    https://github.com/actions/toolkit/tree/7f7e22a9406f546f9084e9eb7a4e541a3563f92b/packages/core#inputsoutputs
 
 ```
 

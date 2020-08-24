@@ -6,6 +6,7 @@ NAME
     
 SYNOPSIS
     Writes debug message to user log.
+    Equivalent of `core.debug(message)`.
     
     
 SYNTAX
@@ -17,7 +18,7 @@ DESCRIPTION
 
 PARAMETERS
     -Message <String>
-        Debug message
+        Debug message.
         
         Required?                    false
         Position?                    1
@@ -38,6 +39,7 @@ OUTPUTS
     
 RELATED LINKS
     https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-a-debug-message
+    https://github.com/actions/toolkit/tree/7f7e22a9406f546f9084e9eb7a4e541a3563f92b/packages/core#logging
 
 ```
 

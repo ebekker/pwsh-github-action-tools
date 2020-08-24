@@ -1,24 +1,27 @@
-# Set-ActionVariable
+# Invoke-ActionNoCommandsBlock
 ```
 
 NAME
-    Set-ActionVariable
+    Invoke-ActionNoCommandsBlock
     
 SYNOPSIS
-    Sets env variable for this action and future actions in the job.
-    Equivalent of `core.exportVariable(name, value)`.
+    Invokes a scriptblock that won't result in any output interpreted as a workflow command.
+    Useful for printing arbitrary text that may contain command-like text.
+    No quivalent in `@actions/core` package.
     
     
 SYNTAX
-    Set-ActionVariable [-Name] <String> [-Value] <Object> [-SkipLocal] [<CommonParameters>]
+    Invoke-ActionNoCommandsBlock [-EndToken] <String> [-ScriptBlock] <ScriptBlock> [<CommonParameters>]
+    
+    Invoke-ActionNoCommandsBlock [-ScriptBlock] <ScriptBlock> -GenerateToken [<CommonParameters>]
     
     
 DESCRIPTION
     
 
 PARAMETERS
-    -Name <String>
-        The name of the variable to set.
+    -EndToken <String>
+        String token to stop workflow commands, used after scriptblock to start workflow commands back.
         
         Required?                    true
         Position?                    1
@@ -26,8 +29,8 @@ PARAMETERS
         Accept pipeline input?       false
         Accept wildcard characters?  false
         
-    -Value <Object>
-        The value of the variable. Non-string values will be converted to a string via ConvertTo-Json.
+    -ScriptBlock <ScriptBlock>
+        Script block to invoke within a no-commands context.
         
         Required?                    true
         Position?                    2
@@ -35,10 +38,10 @@ PARAMETERS
         Accept pipeline input?       false
         Accept wildcard characters?  false
         
-    -SkipLocal [<SwitchParameter>]
-        Do not set variable in current action's/step's environment.
+    -GenerateToken [<SwitchParameter>]
+        Use this to automatically generate a GUID and use it as the EndToken.
         
-        Required?                    false
+        Required?                    true
         Position?                    named
         Default value                False
         Accept pipeline input?       false
@@ -56,8 +59,7 @@ OUTPUTS
     
     
 RELATED LINKS
-    https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-an-environment-variable
-    https://github.com/actions/toolkit/tree/7f7e22a9406f546f9084e9eb7a4e541a3563f92b/packages/core#exporting-variables
+    https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#stopping-and-starting-workflow-commands
 
 ```
 

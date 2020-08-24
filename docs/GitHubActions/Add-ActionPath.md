@@ -6,6 +6,7 @@ NAME
     
 SYNOPSIS
     Prepends path to the PATH (for this action and future actions).
+    Equivalent of `core.addPath(path)`.
     
     
 SYNTAX
@@ -47,6 +48,7 @@ OUTPUTS
     
 RELATED LINKS
     https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#adding-a-system-path
+    https://github.com/actions/toolkit/tree/7f7e22a9406f546f9084e9eb7a4e541a3563f92b/packages/core#path-manipulation
 
 ```
 
