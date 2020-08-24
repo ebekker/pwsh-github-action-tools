@@ -6,10 +6,17 @@ NAME
     
 SYNOPSIS
     Adds a warning issue.
+    Equivalent of `core.warning(message)`.
     
     
 SYNTAX
-    Write-ActionWarning [[-Message] <String>] [[-File] <String>] [[-Line] <Int32>] [[-Col] <Int32>] [<CommonParameters>]
+    Write-ActionWarning [[-Message] <String>] [-File] <String> [-Line] <Int32> [-Column] <Int32> [<CommonParameters>]
+    
+    Write-ActionWarning [[-Message] <String>] [-File] <String> [-Line] <Int32> [<CommonParameters>]
+    
+    Write-ActionWarning [[-Message] <String>] [-File] <String> [<CommonParameters>]
+    
+    Write-ActionWarning [[-Message] <String>] [<CommonParameters>]
     
     
 DESCRIPTION
@@ -17,7 +24,7 @@ DESCRIPTION
 
 PARAMETERS
     -Message <String>
-        Warning issue message
+        Warning issue message.
         
         Required?                    false
         Position?                    1
@@ -26,26 +33,29 @@ PARAMETERS
         Accept wildcard characters?  false
         
     -File <String>
+        Filename where the issue occured.
         
-        Required?                    false
+        Required?                    true
         Position?                    2
         Default value                
         Accept pipeline input?       false
         Accept wildcard characters?  false
         
     -Line <Int32>
+        Line number of the File where the issue occured.
         
-        Required?                    false
+        Required?                    true
         Position?                    3
-        Default value                -1
+        Default value                0
         Accept pipeline input?       false
         Accept wildcard characters?  false
         
-    -Col <Int32>
+    -Column <Int32>
+        Column number in Line in File where the issue occured.
         
-        Required?                    false
+        Required?                    true
         Position?                    4
-        Default value                -1
+        Default value                0
         Accept pipeline input?       false
         Accept wildcard characters?  false
         
@@ -59,9 +69,16 @@ INPUTS
     
 OUTPUTS
     
+NOTES
+    
+    
+        File, Line and Column parameters are supported by the actual workflow command,
+        but not available in `@actions/core` package.
+    
     
 RELATED LINKS
     https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#setting-a-warning-message
+    https://github.com/actions/toolkit/tree/7f7e22a9406f546f9084e9eb7a4e541a3563f92b/packages/core#logging
 
 ```
 

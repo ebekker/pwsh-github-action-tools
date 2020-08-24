@@ -6,6 +6,8 @@ NAME
     
 SYNOPSIS
     Begin an output group.
+    Output until the next `groupEnd` will be foldable in this group.
+    Equivalent of `core.startGroup(name)`.
     
     
 SYNTAX
@@ -18,7 +20,7 @@ DESCRIPTION
 
 PARAMETERS
     -Name <String>
-        Name of the output group.
+        The name of the output group.
         
         Required?                    true
         Position?                    1
@@ -38,7 +40,8 @@ OUTPUTS
     
     
 RELATED LINKS
-    https://github.com/actions/toolkit/tree/a6e72497764b1cf53192eb720f551d7f0db3a4b4/packages/core#logging
+    https://github.com/actions/toolkit/blob/7f7e22a9406f546f9084e9eb7a4e541a3563f92b/docs/commands.md#group-and-ungroup-log-lines
+    https://github.com/actions/toolkit/tree/7f7e22a9406f546f9084e9eb7a4e541a3563f92b/packages/core#logging
 
 ```
 

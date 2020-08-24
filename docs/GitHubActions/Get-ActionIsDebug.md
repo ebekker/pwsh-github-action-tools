@@ -1,16 +1,16 @@
-# Exit-ActionOutputGroup
+# Get-ActionIsDebug
 ```
 
 NAME
-    Exit-ActionOutputGroup
+    Get-ActionIsDebug
     
 SYNOPSIS
-    End an output group.
-    Equivalent of `core.endGroup()`.
+    Gets whether Actions Step Debug is on or not.
+    Equivalent of `core.isDebug()`.
     
     
 SYNTAX
-    Exit-ActionOutputGroup [<CommonParameters>]
+    Get-ActionIsDebug [<CommonParameters>]
     
     
 DESCRIPTION
@@ -26,10 +26,12 @@ PARAMETERS
 INPUTS
     
 OUTPUTS
+    System.Boolean
+    
     
     
 RELATED LINKS
-    https://github.com/actions/toolkit/blob/7f7e22a9406f546f9084e9eb7a4e541a3563f92b/docs/commands.md#group-and-ungroup-log-lines
+    https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#using-workflow-commands-to-access-toolkit-functions
     https://github.com/actions/toolkit/tree/7f7e22a9406f546f9084e9eb7a4e541a3563f92b/packages/core#logging
 
 ```

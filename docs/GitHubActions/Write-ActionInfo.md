@@ -6,6 +6,8 @@ NAME
     
 SYNOPSIS
     Writes info to log with console.log.
+    Equivalent of `core.info(message)`.
+    Forwards to Write-Host.
     
     
 SYNTAX
@@ -17,7 +19,7 @@ DESCRIPTION
 
 PARAMETERS
     -Message <String>
-        Info message
+        Info message.
         
         Required?                    false
         Position?                    1
@@ -37,6 +39,7 @@ OUTPUTS
     
     
 RELATED LINKS
+    https://github.com/actions/toolkit/tree/7f7e22a9406f546f9084e9eb7a4e541a3563f92b/packages/core#logging
 
 ```
 

@@ -5,7 +5,9 @@ NAME
     Set-ActionFailed
     
 SYNOPSIS
-    Used as a shortcut for `Write-ActionError` and `exit 1`
+    Sets an action status to failed.
+    When the action exits it will be with an exit code of 1.
+    Equivalent of `core.setFailed(message)`.
     
     
 SYNTAX
@@ -17,6 +19,7 @@ DESCRIPTION
 
 PARAMETERS
     -Message <String>
+        Add issue message.
         
         Required?                    false
         Position?                    1
@@ -36,7 +39,8 @@ OUTPUTS
     
     
 RELATED LINKS
-    https://github.com/actions/toolkit/tree/a6e72497764b1cf53192eb720f551d7f0db3a4b4/packages/core#exit-codes
+    https://docs.github.com/en/actions/reference/workflow-commands-for-github-actions#masking-a-value-in-log
+    https://github.com/actions/toolkit/tree/7f7e22a9406f546f9084e9eb7a4e541a3563f92b/packages/core#exit-codes
 
 ```
 
