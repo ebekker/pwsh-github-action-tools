@@ -1,3 +1,4 @@
+#!/usr/bin/env pwsh
 
 ## This impelements a quick and dirty way to convert
 ## native PWSH help content into a Markdown format.
@@ -6,37 +7,43 @@
 ## each exported command to its specific page.
 
 ## Invoke as a child session to not mix module under build with modules in Runspace
-pwsh -c @'
-    ipmo ./GitHubActions/
-    $modDocs = './docs/GitHubActions'
+$cmd = {
+    $mod = Import-Module ./GitHubActions -PassThru -Scope Local -Force
 
-    if (-not (Test-Path $modDocs)) { mkdir $modDocs }
-
-    $mod = Get-Module GitHubActions
-    Write-Output """"                                    > $modDocs/README.md
-    Write-Output ""# $($mod.Name) _($($mod.Version))_"" >> $modDocs/README.md
-    Write-Output ""$($mod.Description)""                >> $modDocs/README.md
-    Write-Output ""| Cmdlet | Synopsis |""              >> $modDocs/README.md
-    Write-Output ""|-|-|""                              >> $modDocs/README.md
-
-    Get-Command -Module GitHubActions | % { Get-Help $_.Name | Select-Object @{
-        Name = ""Row""
-        Expression = {
-            $n = $_.Name.Trim()
-            $s = $_.Synopsis.Trim().Replace(""`r"",'').Replace(""`n"", '<br/>')
-            ""| [$($n)]($($n).md) | $($s) |""
+    $docsPath = "docs/$($mod.Name)"
+    $readme = "$docsPath/README.md"
+    Remove-Item $docsPath -Force -Recurse -ErrorAction:Ignore
+    if (-not (Test-Path $docsPath)) {
+        mkdir $docsPath | Out-Null
+    }
+    Write-Output "# $($mod.Name) _($($mod.Version))_" >> $readme
+    Write-Output "$($mod.Description)"                >> $readme
+    Write-Output "| Cmdlet | Synopsis |"              >> $readme
+    Write-Output "|-|-|"                              >> $readme
+    Get-Command -Module $mod.Name | ForEach-Object {
+        Get-Help $_.Name | Select-Object @{
+            Name       = "Row"
+            Expression = {
+                $n = $_.Name.Trim()
+                $s = $_.Synopsis.Trim() -replace '\r?\n', '<br/>'
+                "| [$($n)]($($n).md) | $($s) |"
+            }
         }
-    } } | Select-Object -Expand Row  >> $modDocs/README.md
-    Get-Command -Module GitHubActions | % { Get-Help -Full $_.Name | Select-Object @{
-        Name = ""Row""
-        Expression = {
-            $n = $_.Name.Trim()
-            ""# $n""
-            ""``````""
-            $_
-            ""``````""
-        }
-    } | Select-Object -Expand Row  > ""$modDocs/$($_.Name).md"" }
+    } | Select-Object -Expand Row  >> $readme
 
-    Write-Output ""###### $($mod.Copyright)"" >> $modDocs/README.md
-'@
+    Write-Output "###### $($mod.Copyright)" >> $readme
+
+    Get-Command -Module $mod.Name | ForEach-Object {
+        Get-Help -Full $_.Name | Select-Object @{
+            Name       = "Row"
+            Expression = {
+                $n = $_.Name.Trim()
+                "# $n"
+                "``````"
+                $_
+                "``````"
+            }
+        } | Select-Object -Expand Row  > "$docsPath/$($_.Name).md"
+    }
+}
+pwsh -c $cmd -wd $PSScriptRoot

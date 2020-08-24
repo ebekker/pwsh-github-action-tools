@@ -46,12 +46,16 @@
     ## Functions to export from this module
     FunctionsToExport = @(
         ,'Add-ActionPath'
-        ,'Add-ActionSecretMask'
+        ,'Add-ActionSecret'
         ,'Enter-ActionOutputGroup'
         ,'Exit-ActionOutputGroup'
         ,'Get-ActionInput'
         ,'Get-ActionInputs'
-        ,'Invoke-ActionWithinOutputGroup'
+        ,'Get-ActionIsDebug'
+        ,'Invoke-ActionGroup'
+        ,'Invoke-ActionNoCommandsBlock'
+        ,'Send-ActionCommand'
+        ,'Set-ActionCommandEcho'
         ,'Set-ActionFailed'
         ,'Set-ActionOutput'
         ,'Set-ActionVariable'

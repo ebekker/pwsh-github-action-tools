@@ -1,203 +1,337 @@
-
-Import-Module Pester
-
-Import-Module $PSScriptRoot/../GitHubActions
-
-if (-not (Get-Variable -Scope script -Name EOL -ErrorAction Ignore)) {
-    $script:EOL = [System.Environment]::NewLine
-}
+Set-StrictMode -Version Latest
 
 BeforeAll {
-    . $PSScriptRoot/test-helpers.ps1
-}
-
-Describe 'Set-ActionVariable' {
-    $testCases = @(
-        @{ Name = 'varName1'  ; Value = 'varValue1' }
-        @{ Name = 'var name 2'; Value = 'var value 2' }
-        @{ Name = 'var,name;3'; Value = 'var,value;3'
-            Expected = "::set-env name=var%2Cname%3B3::var,value;3$EOL" }
-    )
-    It 'Given valid -Name and -Value, and -SkipLocal' -TestCases $testCases {
-        param($Name, $Value, $Expected)
-
-        if (-not $Expected) {
-            $Expected = "::set-env name=$($Name)::$($Value)$EOL"
-        }
-        
-        $output = Set-ActionVariable $Name $Value -SkipLocal
-        $output | Should -Be $Expected
-        [System.Environment]::GetEnvironmentVariable($Name) | Should -BeNullOrEmpty
-    }
-    It 'Given valid -Name and -Value, and NOT -SkipLocal' -TestCases $testCases {
-        param($Name, $Value, $Expected)
-
-        if (-not $Expected) {
-            $Expected = "::set-env name=$($Name)::$($Value)$EOL"
-        }
-        
-        Set-ActionVariable $Name $Value | Should -Be $Expected
-        [System.Environment]::GetEnvironmentVariable($Name) | Should -Be $Value
-    }
-}
-
-Describe 'Add-ActionSecretMask' {
-    It 'Given a valid -Secret' {
-        $secret = 'f00B@r!'
-        Add-ActionSecretMask $secret | Should -Be "::add-mask::$($secret)$EOL"
-    }
-}
-
-Describe 'Add-ActionPath' {
-    It 'Given a valid -Path and -SkipLocal' {
-        $addPath = '/to/some/path'
-        $oldPath = [System.Environment]::GetEnvironmentVariable('PATH')
-        Add-ActionPath $addPath -SkipLocal | Should -Be "::add-path::$($addPath)$EOL"
-        [System.Environment]::GetEnvironmentVariable('PATH') | Should -Be $oldPath
-    }
-
-    It 'Given a valid -Path and NOT -SkipLocal' {
-        $addPath = '/to/some/path'
-        $oldPath = [System.Environment]::GetEnvironmentVariable('PATH')
-        $newPath = "$($addPath)$([System.IO.Path]::PathSeparator)$($oldPath)"
-        Add-ActionPath $addPath | Should -Be "::add-path::$($addPath)$EOL"
-        [System.Environment]::GetEnvironmentVariable('PATH') | Should -Be $newPath
-    }
+    Get-Module GitHubActions | Remove-Module
+    Import-Module $PSScriptRoot/../GitHubActions
 }
 
 Describe 'Get-ActionInput' {
-    [System.Environment]::SetEnvironmentVariable('INPUT_INPUT1', 'Value 1')
-    [System.Environment]::SetEnvironmentVariable('INPUT_INPUT3', 'Value 3')
+    Context "When requested input doesn't exist" {
+        It "Should return empty string" {
+            $result = Get-ActionInput ([Guid]::NewGuid())
+            $result | Should -Be ''
+        }
+        It "Given Required switch, it throws" {
+            {
+                Get-ActionInput ([Guid]::NewGuid()) -Required
+            } | Should -Throw
+        }
+    }
+    Context "When requested input exists" {
+        It "Should return it's value" {
+            Mock Get-ChildItem { @{Value = 'test value' } } {
+                $Path -eq 'Env:INPUT_TEST_INPUT'
+            } -ModuleName GitHubActions
 
-    $testCases = @(
-        @{ Name = 'input1' ; Should = @{ Be = $true; ExpectedValue = 'Value 1' } }
-        @{ Name = 'INPUT1' ; Should = @{ Be = $true; ExpectedValue = 'Value 1' } }
-        @{ Name = 'Input1' ; Should = @{ Be = $true; ExpectedValue = 'Value 1' } }
-        @{ Name = 'input2' ; Should = @{ BeNullOrEmpty = $true } }
-        @{ Name = 'INPUT2' ; Should = @{ BeNullOrEmpty = $true } }
-        @{ Name = 'Input2' ; Should = @{ BeNullOrEmpty = $true } }
-    )
+            $result = Get-ActionInput TEST_INPUT
 
-    It 'Given valid -Name' -TestCases $testCases {
-        param($Name, $Should)
+            $result | Should -Be 'test value'
+        }
+        It "Should trim the returned value" {
+            Mock Get-ChildItem { @{Value = "`n  test value `n  `n" } } {
+                $Path -eq 'Env:INPUT_TEST_INPUT'
+            } -ModuleName GitHubActions
 
-        Get-ActionInput $Name | Should @Should
-        Get-ActionInput $Name | Should @Should
-        Get-ActionInput $Name | Should @Should
-        Get-ActionInput $Name | Should @Should
-        Get-ActionInput $Name | Should @Should
-        Get-ActionInput $Name | Should @Should
+            $result = Get-ActionInput TEST_INPUT
+
+            $result | Should -Be 'test value'
+        }
+    }
+    Context "When input name contains spaces" {
+        It "Should replace them with underscores" {
+            Mock Get-ChildItem { @{Value = 'value' } } {
+                $Path -eq 'Env:INPUT_TEST_INPUT'
+            } -ModuleName GitHubActions
+
+            $result = Get-ActionInput 'test input'
+
+            $result | Should -Be 'value'
+        }
     }
 }
-
-Describe 'Get-ActionInputs' {
-    [System.Environment]::SetEnvironmentVariable('INPUT_INPUT1', 'Value 1')
-    [System.Environment]::SetEnvironmentVariable('INPUT_INPUT3', 'Value 3')
-
-    $testCases = @(
-        @{ Name = 'InPut1' ; Should = @{ Be = $true; ExpectedValue = "Value 1" } }
-        @{ Name = 'InPut2' ; Should = @{ BeNullOrEmpty = $true } }
-        @{ Name = 'InPut3' ; Should = @{ Be = $true; ExpectedValue = "Value 3" } }
-    )
-    It 'Given 2 predefined inputs' {
-        $inputs = Get-ActionInputs
-        $inputs.Count | Should -Be 2
+Describe 'Set-ActionOutput' {
+    BeforeAll {
+        Mock Write-Host { } -ModuleName GitHubActions
     }
+    It "Sends appropriate workflow command to host" {
+        Set-ActionOutput 'my-result' 'test value'
 
-    It 'Given 2 predefined inputs, and a -Name in any case' -TestCases $testCases {
-        param($Name, $Should)
-
-        $inputs = Get-ActionInputs
-
-        $key = $Name
-        $inputs[$key] | Should @Should
-        $inputs.$key | Should @Should
-        $key = $Name.ToUpper()
-        $inputs[$key] | Should @Should
-        $inputs.$key | Should @Should
-        $key = $Name.ToLower()
-        $inputs[$key] | Should @Should
-        $inputs.$key | Should @Should
+        Should -Invoke Write-Host -ParameterFilter {
+            $Object -eq '::set-output name=my-result::test value'
+        } -ModuleName GitHubActions
     }
 }
+Describe 'Add-ActionSecret' {
+    BeforeAll {
+        Mock Write-Host { } -ModuleName GitHubActions
+    }
+    It "Sends appropriate workflow command to host" {
+        Add-ActionSecret 'test value'
 
-Describe 'Set-ActionOuput' {
-    It 'Given a valid -Name and -Value' {
-        $output = Set-ActionOutput 'foo_bar' 'foo bar value'
-        $output | Should -Be "::set-output name=foo_bar::foo bar value$EOL"
+        Should -Invoke Write-Host -ParameterFilter {
+            $Object -eq '::add-mask::test value'
+        } -ModuleName GitHubActions
     }
 }
+Describe 'Set-ActionVariable' {
+    BeforeAll {
+        Mock Write-Host { } -ModuleName GitHubActions
+    }
+    BeforeEach {
+        Remove-Item "Env:my-var" -ErrorAction SilentlyContinue
+    }
+    It "Given value '<value>', sends command with '<expectedcmd>' and sets env var to '<expectedenv>'" -TestCases @(
+        @{ Value = ''; ExpectedCmd = ''; ExpectedEnv = $null }
+        @{ Value = 'test value'; ExpectedCmd = 'test value'; ExpectedEnv = 'test value' }
+        @{ Value = 'A % B'; ExpectedCmd = 'A %25 B'; ExpectedEnv = 'A % B' }
+        @{ Value = [ordered]@{ a = '1x'; b = '2y' }; ExpectedCmd = '{"a":"1x","b":"2y"}'; ExpectedEnv = '{"a":"1x","b":"2y"}' }
+    ) {
+        Set-ActionVariable 'my-var' $Value
 
-Describe 'Write-ActionDebug' {
-    It 'Given a valid -Message' {
-        $output = Write-ActionDebug 'This is a sample message'
-        $output | Should -Be "::debug::This is a sample message$EOL"
+        ${env:my-var} | Should -Be $ExpectedEnv
+        Should -Invoke Write-Host -ParameterFilter {
+            $Object -eq "::set-env name=my-var::$ExpectedCmd"
+        } -ModuleName GitHubActions
+    }
+    AfterEach {
+        Remove-Item "Env:my-var" -ErrorAction SilentlyContinue
     }
 }
+Describe 'Add-ActionPath' {
+    BeforeAll {
+        Mock Write-Host { } -ModuleName GitHubActions
+    }
+    BeforeEach {
+        [Diagnostics.CodeAnalysis.SuppressMessageAttribute('PSUseDeclaredVarsMoreThanAssignments', 'Used in AfterEach')]
+        $prevPath = [System.Environment]::GetEnvironmentVariable('PATH')
+    }
+    It "Sends appropriate workflow command to host and prepends PATH" {
+        Add-ActionPath 'test path'
 
+        $env:PATH | Should -BeLike "test path$([System.IO.Path]::PathSeparator)*" -Because 'PATH should be also prepended in current scope'
+        Should -Invoke Write-Host -ParameterFilter {
+            $Object -eq '::add-path::test path'
+        } -ModuleName GitHubActions
+    }
+    It "Given SkipLocal switch, sends command but doesn't change PATH" {
+        $path = $env:PATH
+
+        Add-ActionPath 'test path' -SkipLocal
+
+        $env:PATH | Should -Be $path -Because "PATH shouldn't be modified"
+        Should -Invoke Write-Host -ParameterFilter {
+            $Object -eq '::add-path::test path'
+        } -ModuleName GitHubActions
+    }
+    AfterEach {
+        [System.Environment]::SetEnvironmentVariable('PATH', $prevPath)
+    }
+}
+Describe 'Set-ActionCommandEcho' {
+    BeforeAll {
+        Mock Write-Host { } -ModuleName GitHubActions
+    }
+    It "Given '<value>' should send a workflow command to turn echoing commands <expected>" -TestCases @(
+        @{ Value = $false; Expected = 'off' }
+        @{ Value = $true; Expected = 'on' }
+    ) {
+        Set-ActionCommandEcho $Value
+
+        Should -Invoke Write-Host -ParameterFilter {
+            $Object -eq "::echo::$Expected"
+        } -ModuleName GitHubActions
+    }
+}
+Describe 'Set-ActionFailed' {
+    BeforeAll {
+        Mock Write-Host { } -ModuleName GitHubActions
+    }
+    BeforeEach {
+        [System.Environment]::ExitCode = 0
+    }
+    It "Given message '<value>' should send error command with message '<expected> and set ExitCode to 1" -TestCases @(
+        @{ Value = $null; Expected = '' }
+        @{ Value = ''; Expected = '' }
+        @{ Value = 'fail'; Expected = 'fail' }
+        @{ Value = "first fail line`nsecond fail line"; Expected = 'first fail line%0Asecond fail line' }
+    ) {
+        Set-ActionFailed $Value
+
+        [System.Environment]::ExitCode | Should -Be 1 -Because 'this exit code is expected to be used upon exit'
+        Should -Invoke Write-Host -ParameterFilter {
+            $Object -eq "::error::$Expected"
+        } -ModuleName GitHubActions
+    }
+    AfterEach {
+        [System.Environment]::ExitCode = 0
+    }
+}
+Describe 'Get-ActionIsDebug' {
+    BeforeAll {
+        Mock Write-Host { } -ModuleName GitHubActions
+    }
+    BeforeEach {
+        Remove-Item Env:RUNNER_DEBUG -ErrorAction SilentlyContinue
+    }
+    It 'Given env var is not set, return false' {
+        $result = Get-ActionIsDebug
+
+        $result | Should -BeExactly $false
+    }
+    It "Given env var is set to '<value>' it returns '<expected>'" -TestCases @(
+        @{ Value = $null; Expected = $false }
+        @{ Value = 0; Expected = $false }
+        @{ Value = 2; Expected = $false }
+        @{ Value = 1; Expected = $true }
+        @{ Value = '1'; Expected = $true }
+        @{ Value = 'true'; Expected = $false }
+    ) {
+        $env:RUNNER_DEBUG = $Value
+
+        $result = Get-ActionIsDebug
+        
+        $result | Should -BeExactly $Expected
+    }
+    AfterEach {
+        Remove-Item Env:RUNNER_DEBUG -ErrorAction SilentlyContinue
+    }
+}
 Describe 'Write-ActionError' {
-    It 'Given a valid -Message' {
-        $output = Write-ActionError 'This is a sample message'
-        $output | Should -Be "::error::This is a sample message$EOL"
+    BeforeAll {
+        Mock Write-Host { } -ModuleName GitHubActions
     }
-    It 'Given file details' {
-        $output = Write-ActionError 'Sample message with file' -File 'sample.txt' -Line 10 -Col 5
-        $output | Should -Be "::error file=sample.txt,line=10,col=5::Sample message with file$EOL"
+    It "Given a message '<value>' sends a workflow command with it" -TestCases @(
+        @{ Value = $null; Expected = '' }
+        @{ Value = 'my error'; Expected = 'my error' }
+        @{ Value = "my error`nsecond line"; Expected = 'my error%0Asecond line' }
+    ) {
+        Write-ActionError $Value
+        Should -Invoke Write-Host -ParameterFilter {
+            $Object -eq "::error::$Expected"
+        } -ModuleName GitHubActions
     }
 }
-
 Describe 'Write-ActionWarning' {
-    It 'Given a valid -Message' {
-        $output = Write-ActionWarning 'This is a sample message'
-        $output | Should -Be "::warning::This is a sample message$EOL"
+    BeforeAll {
+        Mock Write-Host { } -ModuleName GitHubActions
     }
-    It 'Given file details' {
-        $output = Write-ActionWarning 'Sample message with file' -File 'sample.txt' -Line 10 -Col 5
-        $output | Should -Be "::warning file=sample.txt,line=10,col=5::Sample message with file$EOL"
+    It "Given a message '<value>' sends a workflow command with it" -TestCases @(
+        @{ Value = $null; Expected = '' }
+        @{ Value = 'my warning'; Expected = 'my warning' }
+        @{ Value = "my warning`nsecond line"; Expected = 'my warning%0Asecond line' }
+    ) {
+        Write-ActionWarning $Value
+        Should -Invoke Write-Host -ParameterFilter {
+            $Object -eq "::warning::$Expected"
+        } -ModuleName GitHubActions
     }
 }
 
 Describe 'Write-ActionInfo' {
-    It 'Given a valid -Message' {
-        $output = Write-ActionInfo 'This is a sample message'
-        $output | Should -Be "This is a sample message$EOL"
+    BeforeAll {
+        Mock Write-Host { } -ModuleName GitHubActions
+    }
+    It "Given a message '<value>' sends it to host" -TestCases @(
+        @{ Value = 'my log'; Expected = 'my log' }
+        @{ Value = "my log`nnewline"; Expected = "my log`nnewline" }
+    ) {
+        Write-ActionInfo $Value
+        Should -Invoke Write-Host -ParameterFilter {
+            $Object -eq $Expected
+        } -ModuleName GitHubActions
     }
 }
-
-Describe 'Set-ActionFailed' {
-    It 'Given a valid -Message' {
-        $output =  pwsh -c "ipmo $PSScriptRoot/../GitHubActions; Set-ActionFailed 'failed message'"
-        $output[0] | Should -Be "::error::failed message"
-        $LASTEXITCODE | Should -Be 1
-    }
-}
-
 Describe 'Enter-ActionOutputGroup' {
-    It 'Given a valid -Name' {
-        $output = Enter-ActionOutputGroup 'Sample Group'
-        $output | Should -Be "::group::Sample Group$EOL"
+    BeforeAll {
+        Mock Write-Host { } -ModuleName GitHubActions
+    }
+    It "Given '<name>' sends a workflow command with it" -TestCases @(
+        @{ Name = 'my group'; Expected = 'my group' }
+        @{ Name = 'my group with percent%'; Expected = 'my group with percent%25' }
+    ) {
+        Enter-ActionOutputGroup $Name
+        Should -Invoke Write-Host -ParameterFilter {
+            $Object -eq "::group::$Expected"
+        } -ModuleName GitHubActions
     }
 }
-
 Describe 'Exit-ActionOutputGroup' {
-    It 'Given everything is peachy' {
-        $output = Exit-ActionOutputGroup
-        $output | Should -Be "::endgroup::$EOL"
+    BeforeAll {
+        Mock Write-Host { } -ModuleName GitHubActions
+    }
+    It "Sends a workflow command" {
+        Exit-ActionOutputGroup
+        Should -Invoke Write-Host -ParameterFilter {
+            $Object -eq '::endgroup::'
+        } -ModuleName GitHubActions
     }
 }
-
-Describe 'Invoke-ActionWithinOutputGroup' {
-    It 'Given a valid -Name and -ScriptBlock' {
-        $output = Invoke-ActionWithinOutputGroup 'Sample Group' {
-            Write-ActionInfo "Message 1"
-            Write-ActionInfo "Message 2"
+Describe 'Invoke-ActionGroup' {
+    BeforeAll {
+        Mock Write-Host { } -ModuleName GitHubActions
+    }
+    It "Given a scriptblock, sends a workflow command before and after it" {
+        Invoke-ActionGroup 'my group' {
+            Write-Output 'doing stuff'
         }
+        @('::group::my group', '::endgroup::') | ForEach-Object {
+            $cmd = $_
+            Should -Invoke Write-Host -ParameterFilter {
+                $Object -eq $cmd
+            } -ModuleName GitHubActions
+        }
+    }
+}
+Describe 'Invoke-ActionNoCommandsBlock' {
+    BeforeAll {
+        Mock Write-Host { } -ModuleName GitHubActions
+    }
+    It "Given a scriptblock, sends a workflow command before and after it" {
+        Invoke-ActionNoCommandsBlock 'my block' {
+            Write-Output 'doing stuff'
+        }
+        @('::stop-commands::my block', '::my block::') | ForEach-Object {
+            $cmd = $_
+            Should -Invoke Write-Host -ParameterFilter {
+                $Object -eq $cmd
+            } -ModuleName GitHubActions
+        }
+    }
+}
+Describe 'Send-ActionCommand' {
+    BeforeAll {
+        Mock Write-Host { } -ModuleName GitHubActions
+    }
+    It "Given no command ('<value>') throws" -TestCases @(
+        @{ Value = $null }
+        @{ Value = '' }
+    ) {
+        {
+            Send-ActionCommand -Command $Value
+        } | Should -Throw "Cannot validate argument on parameter 'Command'. The argument is null or empty.*"
+    }
+    It "Given a command with message '<msg>' writes '<expected>' to host" -TestCases @(
+        @{ Msg = $null; Expected = '::test-cmd::' }
+        @{ Msg = ''; Expected = '::test-cmd::' }
+        @{ Msg = 'a'; Expected = '::test-cmd::a' }
+        @{ Msg = "a `r `n b : c % d"; Expected = '::test-cmd::a %0D %0A b : c %25 d' }
+    ) {
+        Send-ActionCommand test-cmd -Message $Msg
 
-        $output | Should -Be @(
-            "::group::Sample Group$EOL"
-            "Message 1$EOL"
-            "Message 2$EOL"
-            "::endgroup::$EOL"
-        )
+        Should -Invoke Write-Host -ParameterFilter {
+            $Object -eq $Expected
+        } -ModuleName GitHubActions
+    }
+    It "Given a command with params '<params>' writes '<expected>' to host" -TestCases @(
+        @{ Params = @{ a = $null; b = '' }; Expected = '::test-cmd::' }
+        @{ Params = @{ a = 'A' }; Expected = '::test-cmd a=A::' }
+        @{ Params = [ordered]@{ a = 'A'; b = 'B' }; Expected = '::test-cmd a=A,b=B::' }
+        @{ Params = [ordered]@{ a = "A `r B `n C : D , E % F" }; Expected = '::test-cmd a=A %0D B %0A C %3A D %2C E %25 F::' }
+    ) {
+        Send-ActionCommand test-cmd $Params
+
+        Should -Invoke Write-Host -ParameterFilter {
+            $Object -eq $Expected
+        } -ModuleName GitHubActions
     }
 }
