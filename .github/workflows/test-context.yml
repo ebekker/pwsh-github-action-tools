@@ -95,6 +95,7 @@ jobs:
           Import-Module ./GitHubActions
 
           Write-ActionInfo "**BEFORE** SETTING VALUES:"
+          Write-ActionInfo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
           $ghEnv = $env:GITHUB_ENV
           $ghPath = $env:GITHUB_PATH
@@ -117,13 +118,15 @@ jobs:
           Write-ActionInfo "  * TEST_VAR2 = [$testVar2]:"
           Write-ActionInfo "  * TEST_VAR3 = [$testVar3]:"
 
-          Write-ActionEnvPath -Path '/tmp/no/such/path'
-          Write-ActionEnvVariable -Name "TEST_VAR1" -Value "Test Value 1"
-          Write-ActionEnvVariable -Name "TEST_VAR1" -Value "Test Value 2`nSecond Line`nThird Line"
-          Write-ActionEnvVariable -Name "TEST_VAR1" -Value "Test Value 3" -Multiline
+          Write-ActionInfo "**SETTING** VALUES:"
+          Write-ActionInfo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
+          Add-ActionPath -Path '/tmp/no/such/path'
+          Set-ActionVariable -Name "TEST_VAR1" -Value "Test Value 1"
+          Set-ActionVariable -Name "TEST_VAR1" -Value "Test Value 2`nSecond Line`nThird Line"
 
           Write-ActionInfo "**AFTER** SETTING VALUES:"
+          Write-ActionInfo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
           $ghEnv = $env:GITHUB_ENV
           $ghPath = $env:GITHUB_PATH
