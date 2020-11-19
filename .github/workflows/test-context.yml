@@ -62,3 +62,112 @@ jobs:
               $payload = $context.Payload
               Write-ActionInfo "The head commit is: $($payload.head_commit | ConvertTo-Json)"
           }
+
+      - name: test GH env files - 0 - read env vars before
+        shell: pwsh
+        run: |
+          Import-Module ./GitHubActions
+
+          $ghEnv = $env:GITHUB_ENV
+          $ghPath = $env:GITHUB_PATH
+          $pathVar  = $env:path
+          $testVar1 = $env:TEST_VAR1
+          $testVar2 = $env:TEST_VAR2
+          $testVar2 = $env:TEST_VAR3
+
+          Write-ActionInfo "Read in GH ENV Paths:"
+          Write-ActionInfo " * ghEnv  = [$ghEnv]"
+          Write-ActionInfo " * ghPath = [$ghPath]"
+
+          Write-ActionInfo "Read in GH ENV Files:"
+          Write-ActionInfo " * ghEnv  = [$(Get-Content -Raw -ErrorAction SilentlyContinue $ghEnv)]"
+          Write-ActionInfo " * ghPath = [$(Get-Content -Raw -ErrorAction SilentlyContinue $ghPath)]"
+
+          Write-ActionInfo "Read in Test ENV Vars:"
+          Write-ActionInfo "  * path      = [$pathVar]:"
+          Write-ActionInfo "  * TEST_VAR1 = [$testVar1]:"
+          Write-ActionInfo "  * TEST_VAR2 = [$testVar2]:"
+          Write-ActionInfo "  * TEST_VAR3 = [$testVar3]:"
+
+      - name: test GH env files - 1 - set env vars
+        shell: pwsh
+        run: |
+          Import-Module ./GitHubActions
+
+          Write-ActionInfo "**BEFORE** SETTING VALUES:"
+
+          $ghEnv = $env:GITHUB_ENV
+          $ghPath = $env:GITHUB_PATH
+          $pathVar  = $env:path
+          $testVar1 = $env:TEST_VAR1
+          $testVar2 = $env:TEST_VAR2
+          $testVar2 = $env:TEST_VAR3
+
+          Write-ActionInfo "Read in GH ENV Paths:"
+          Write-ActionInfo " * ghEnv  = [$ghEnv]"
+          Write-ActionInfo " * ghPath = [$ghPath]"
+
+          Write-ActionInfo "Read in GH ENV Files:"
+          Write-ActionInfo " * ghEnv  = [$(Get-Content -Raw -ErrorAction SilentlyContinue $ghEnv)]"
+          Write-ActionInfo " * ghPath = [$(Get-Content -Raw -ErrorAction SilentlyContinue $ghPath)]"
+
+          Write-ActionInfo "Read in Test ENV Vars:"
+          Write-ActionInfo "  * path      = [$pathVar]:"
+          Write-ActionInfo "  * TEST_VAR1 = [$testVar1]:"
+          Write-ActionInfo "  * TEST_VAR2 = [$testVar2]:"
+          Write-ActionInfo "  * TEST_VAR3 = [$testVar3]:"
+
+          Write-ActionEnvPath -Path '/tmp/no/such/path'
+          Write-ActionEnvVariable -Name "TEST_VAR1" -Value "Test Value 1"
+          Write-ActionEnvVariable -Name "TEST_VAR1" -Value "Test Value 2`nSecond Line`nThird Line"
+          Write-ActionEnvVariable -Name "TEST_VAR1" -Value "Test Value 3" -Multiline
+
+
+          Write-ActionInfo "**AFTER** SETTING VALUES:"
+
+          $ghEnv = $env:GITHUB_ENV
+          $ghPath = $env:GITHUB_PATH
+          $pathVar  = $env:path
+          $testVar1 = $env:TEST_VAR1
+          $testVar2 = $env:TEST_VAR2
+          $testVar2 = $env:TEST_VAR3
+
+          Write-ActionInfo "Read in GH ENV Paths:"
+          Write-ActionInfo " * ghEnv  = [$ghEnv]"
+          Write-ActionInfo " * ghPath = [$ghPath]"
+
+          Write-ActionInfo "Read in GH ENV Files:"
+          Write-ActionInfo " * ghEnv  = [$(Get-Content -Raw -ErrorAction SilentlyContinue $ghEnv)]"
+          Write-ActionInfo " * ghPath = [$(Get-Content -Raw -ErrorAction SilentlyContinue $ghPath)]"
+
+          Write-ActionInfo "Read in Test ENV Vars:"
+          Write-ActionInfo "  * path      = [$pathVar]:"
+          Write-ActionInfo "  * TEST_VAR1 = [$testVar1]:"
+          Write-ActionInfo "  * TEST_VAR2 = [$testVar2]:"
+          Write-ActionInfo "  * TEST_VAR3 = [$testVar3]:"
+
+      - name: test GH env files - 2 - read env vars after
+        shell: pwsh
+        run: |
+          Import-Module ./GitHubActions
+
+          $ghEnv = $env:GITHUB_ENV
+          $ghPath = $env:GITHUB_PATH
+          $pathVar  = $env:path
+          $testVar1 = $env:TEST_VAR1
+          $testVar2 = $env:TEST_VAR2
+          $testVar2 = $env:TEST_VAR3
+
+          Write-ActionInfo "Read in GH ENV Paths:"
+          Write-ActionInfo " * ghEnv  = [$ghEnv]"
+          Write-ActionInfo " * ghPath = [$ghPath]"
+
+          Write-ActionInfo "Read in GH ENV Files:"
+          Write-ActionInfo " * ghEnv  = [$(Get-Content -Raw -ErrorAction SilentlyContinue $ghEnv)]"
+          Write-ActionInfo " * ghPath = [$(Get-Content -Raw -ErrorAction SilentlyContinue $ghPath)]"
+
+          Write-ActionInfo "Read in Test ENV Vars:"
+          Write-ActionInfo "  * path      = [$pathVar]:"
+          Write-ActionInfo "  * TEST_VAR1 = [$testVar1]:"
+          Write-ActionInfo "  * TEST_VAR2 = [$testVar2]:"
+          Write-ActionInfo "  * TEST_VAR3 = [$testVar3]:"
