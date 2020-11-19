@@ -73,7 +73,6 @@ jobs:
           $pathVar  = $env:path
           $testVar1 = $env:TEST_VAR1
           $testVar2 = $env:TEST_VAR2
-          $testVar2 = $env:TEST_VAR3
 
           Write-ActionInfo "Read in GH ENV Paths:"
           Write-ActionInfo " * ghEnv  = [$ghEnv]"
@@ -87,7 +86,6 @@ jobs:
           Write-ActionInfo "  * path      = [$pathVar]:"
           Write-ActionInfo "  * TEST_VAR1 = [$testVar1]:"
           Write-ActionInfo "  * TEST_VAR2 = [$testVar2]:"
-          Write-ActionInfo "  * TEST_VAR3 = [$testVar3]:"
 
       - name: test GH env files - 1 - set env vars
         shell: pwsh
@@ -102,7 +100,6 @@ jobs:
           $pathVar  = $env:path
           $testVar1 = $env:TEST_VAR1
           $testVar2 = $env:TEST_VAR2
-          $testVar2 = $env:TEST_VAR3
 
           Write-ActionInfo "Read in GH ENV Paths:"
           Write-ActionInfo " * ghEnv  = [$ghEnv]"
@@ -116,14 +113,13 @@ jobs:
           Write-ActionInfo "  * path      = [$pathVar]:"
           Write-ActionInfo "  * TEST_VAR1 = [$testVar1]:"
           Write-ActionInfo "  * TEST_VAR2 = [$testVar2]:"
-          Write-ActionInfo "  * TEST_VAR3 = [$testVar3]:"
 
           Write-ActionInfo "**SETTING** VALUES:"
           Write-ActionInfo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
           Add-ActionPath -Path '/tmp/no/such/path'
           Set-ActionVariable -Name "TEST_VAR1" -Value "Test Value 1"
-          Set-ActionVariable -Name "TEST_VAR1" -Value "Test Value 2`nSecond Line`nThird Line"
+          Set-ActionVariable -Name "TEST_VAR2" -Value "Test Value 2`nSecond Line`nThird Line"
 
           Write-ActionInfo "**AFTER** SETTING VALUES:"
           Write-ActionInfo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
@@ -133,7 +129,6 @@ jobs:
           $pathVar  = $env:path
           $testVar1 = $env:TEST_VAR1
           $testVar2 = $env:TEST_VAR2
-          $testVar2 = $env:TEST_VAR3
 
           Write-ActionInfo "Read in GH ENV Paths:"
           Write-ActionInfo " * ghEnv  = [$ghEnv]"
@@ -147,7 +142,6 @@ jobs:
           Write-ActionInfo "  * path      = [$pathVar]:"
           Write-ActionInfo "  * TEST_VAR1 = [$testVar1]:"
           Write-ActionInfo "  * TEST_VAR2 = [$testVar2]:"
-          Write-ActionInfo "  * TEST_VAR3 = [$testVar3]:"
 
       - name: test GH env files - 2 - read env vars after
         shell: pwsh
@@ -159,7 +153,6 @@ jobs:
           $pathVar  = $env:path
           $testVar1 = $env:TEST_VAR1
           $testVar2 = $env:TEST_VAR2
-          $testVar2 = $env:TEST_VAR3
 
           Write-ActionInfo "Read in GH ENV Paths:"
           Write-ActionInfo " * ghEnv  = [$ghEnv]"
@@ -173,4 +166,3 @@ jobs:
           Write-ActionInfo "  * path      = [$pathVar]:"
           Write-ActionInfo "  * TEST_VAR1 = [$testVar1]:"
           Write-ActionInfo "  * TEST_VAR2 = [$testVar2]:"
-          Write-ActionInfo "  * TEST_VAR3 = [$testVar3]:"
