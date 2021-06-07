@@ -2,6 +2,8 @@
 
 Supporting tools for implementing GitHub Actions in PowerShell
 
+:star: I appreciate your star, it helps me decide to which OSS projects I should allocate my spare time.
+
 ---
 
 [![GitHub Workflow - CI](https://github.com/ebekker/pwsh-github-action-tools/workflows/CI/badge.svg)](https://github.com/ebekker/pwsh-github-action-tools/actions?workflow=CI)
