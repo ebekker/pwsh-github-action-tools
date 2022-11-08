@@ -1,9 +1,7 @@
 
 name: natescherer Test Action Context
 
-on:
-  ## Some of these will only fire on the `default` branch
-  workflow_dispatch:
+on: workflow_dispatch
 
 jobs:
   dump-context:
