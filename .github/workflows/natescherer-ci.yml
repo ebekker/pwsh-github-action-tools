@@ -40,8 +40,8 @@ jobs:
         id: pesterTests
         shell: pwsh
         run: |
-          Install-Module -Name Pester -RequiredVersion 4.1.0
-          Install-Module -Name functional
+          Install-Module -Name Pester -RequiredVersion 4.1.0 -Force
+          Install-Module -Name functional -Force
 
           Import-Module Pester
           Import-Module ./GitHubActions
