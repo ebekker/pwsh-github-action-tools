@@ -30,6 +30,9 @@ InModuleScope GitHubActions {
 
             $context = Get-ActionContext
 
+            Write-Host "`$context.RunId is '$($context.RunId)'"
+            Write-Host "`$env:GITHUB_RUN_ID is '$($env:GITHUB_RUN_ID)'"
+
             $context.EventName | Should -Be $env:GITHUB_EVENT_NAME
             $context.Sha | Should -Be $env:GITHUB_SHA
             $context.Ref | Should -Be $env:GITHUB_REF
