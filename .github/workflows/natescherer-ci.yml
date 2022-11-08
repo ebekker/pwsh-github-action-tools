@@ -1,13 +1,19 @@
-name: CI
+
+name: natescherer CI
+
 on:
   push:
     branches:
-      - main
+      - master
       - bugfix/**
       - feature/**
   workflow_dispatch:
+  pull_request:
+  release:
+    types: published
+
 jobs:
-  Test:
+  build:
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -23,34 +29,49 @@ jobs:
           - os: macos-latest
             shell: powershell
     steps:
-      - name: Set Variables
-        run: |
-          "BARE_REPOSITORY=$($env:GITHUB_REPOSITORY.split("/")[1])" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-      - name: Checkout
-        uses: actions/checkout@v3
-      - name: Run Pester Tests
-        uses: natescherer/pester-tests-report@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          shell: ${{ matrix.shell }}
-          tests_fail_step: true
-          report_name: TestResults_${{ runner.os }}_${{ matrix.shell }}
-  TestRelease:
-    if: github.ref_name != 'main' && github.event_name != 'workflow_dispatch'
-    needs: Test
-    runs-on: ubuntu-latest
-    defaults:
-      run:
+    
+      - name: checkout
+        uses: actions/checkout@v1
+
+      ## We have to run the Pester tests manually because the `pester-tests-report` Action
+      ## actually uses our GitHubActions module internally, and produces a conflict due to
+      ## multiple same-named module scripts when the Action tries to run our tests itself
+      - name: pester tests manually
+        id: pesterTests
         shell: pwsh
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+        run: |
+          $modulesToInstall = @(
+            'Pester'
+            'functional'
+          )
+          $modulesToInstall | ForEach-Object {
+            if (-not (Get-Module -ListAvailable -All $_)) {
+              Write-Output "Module [$_] not found, INSTALLING..."
+              Install-Module $_ -Force
+            }
+          }
+
+          Import-Module Pester
+          Import-Module ./GitHubActions
+
+          $test_results_dir = Join-Path $PWD _TMP
+          $test_results_path = Join-Path $test_results_dir test-results.nunit.xml
+          $result_clixml_path = Join-Path $test_results_dir pester-result.xml
+
+          if (-not (Test-Path $test_results_dir)) {
+            mkdir $test_results_dir
+          }
+
+          $pesterResult = Invoke-Pester -PassThru -OutputFile $test_results_path -Path tests
+          Export-Clixml -InputObject $pesterResult -Path $result_clixml_path
+
+          Set-ActionOutput -Name test_results_path -Value $test_results_path
+          Set-ActionOutput -Name result_clixml_path -Value $result_clixml_path
+
+      - name: pester tests report
+        uses: zyborg/pester-tests-report@v1.3.0
         with:
-          fetch-depth: 0
-      - name: Publish Module to Cloudsmith
-        uses: natescherer/publish-powershell-action@v1
-        with:
-          token: ${{ secrets.CLOUDSMITH_KEY }}
-          target: nuget
-          nugetUrl: https://nuget.cloudsmith.io/${{ github.repository }}/v3/index.json
-          path: src
+          test_results_path: ${{ steps.pesterTests.outputs.test_results_path }}
+          result_clixml_path: ${{ steps.pesterTests.outputs.result_clixml_path }}
+          report_name: TestResults_${{ runner.os }}_${{ matrix.shell }}
+          report_title: PWSH GitHub Action Tools Tests
