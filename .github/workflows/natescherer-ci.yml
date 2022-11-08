@@ -40,16 +40,8 @@ jobs:
         id: pesterTests
         shell: pwsh
         run: |
-          $modulesToInstall = @(
-            'Pester'
-            'functional'
-          )
-          $modulesToInstall | ForEach-Object {
-            if (-not (Get-Module -ListAvailable -All $_)) {
-              Write-Output "Module [$_] not found, INSTALLING..."
-              Install-Module $_ -Force
-            }
-          }
+          Install-Module -Name Pester -RequiredVersion 4.1.0
+          Install-Module -Name functional
 
           Import-Module Pester
           Import-Module ./GitHubActions
