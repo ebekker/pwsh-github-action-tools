@@ -12,7 +12,20 @@ on:
 
 jobs:
   dump-context:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        shell: [pwsh, powershell]
+        exclude:
+          - os: ubuntu-latest
+            shell: powershell
+          - os: macos-latest
+            shell: powershell
     
     steps:
     
@@ -20,7 +33,6 @@ jobs:
         uses: actions/checkout@v1
 
       - name: get action context
-        shell: pwsh
         run: |
             Import-Module ./GitHubActions
 
@@ -96,7 +108,6 @@ jobs:
             Write-Host (ConvertTo-Json -Depth 7 $context.Payload)
 
       - name: try docs example
-        shell: pwsh
         run: |
           Import-Module ./GitHubActions
 
@@ -107,7 +118,6 @@ jobs:
           }
 
       - name: test GH env files - 0 - read env vars before
-        shell: pwsh
         run: |
           Import-Module ./GitHubActions
 
@@ -131,7 +141,6 @@ jobs:
           Write-ActionInfo "  * TEST_VAR2 = [$testVar2]:"
 
       - name: test GH env files - 1 - set env vars
-        shell: pwsh
         run: |
           Import-Module ./GitHubActions
 
@@ -187,7 +196,6 @@ jobs:
           Write-ActionInfo "  * TEST_VAR2 = [$testVar2]:"
 
       - name: test GH env files - 2 - read env vars after
-        shell: pwsh
         run: |
           Import-Module ./GitHubActions
 
