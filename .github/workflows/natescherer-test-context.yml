@@ -3,14 +3,7 @@ name: natescherer Test Action Context
 
 on:
   ## Some of these will only fire on the `default` branch
-  push:
-    branches:
-      - master
-      - bugfix/**
-      - feature/**
-  release:
-  issues:
-  issue_comment:
+  workflow_dispatch:
 
 jobs:
   dump-context:
