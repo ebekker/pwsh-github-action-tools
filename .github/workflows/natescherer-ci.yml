@@ -38,7 +38,7 @@ jobs:
       ## multiple same-named module scripts when the Action tries to run our tests itself
       - name: pester tests manually
         id: pesterTests
-        shell: pwsh
+        shell: ${{ matrix.shell }}
         run: |
           $modulesToInstall = @(
             'Pester'
