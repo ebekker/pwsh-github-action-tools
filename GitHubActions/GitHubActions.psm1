@@ -148,9 +148,7 @@ function Set-ActionOutput {
         [string]$Value
     )
 
-    Send-ActionCommand set-output @{
-        name = $Name
-    } -Message $Value
+    "$Name=$Value" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 }
 
 <#
