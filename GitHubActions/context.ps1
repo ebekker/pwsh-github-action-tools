@@ -111,8 +111,8 @@ function BuildActionContextMap {
         Action = $env:GITHUB_ACTION
         Actor = $env:GITHUB_ACTOR
         Job = $env:GITHUB_JOB
-        RunNumber = ParseIntSafely $env:GITHUB_RUN_NUMBER
-        RunId = ParseIntSafely $env:GITHUB_RUN_ID
+        RunNumber = ParseLongSafely $env:GITHUB_RUN_NUMBER
+        RunId = ParseLongSafely $env:GITHUB_RUN_ID
 
         Payload = $payload
     }
@@ -164,17 +164,17 @@ function BuildActionContextIssueMap {
     }
 }
 
-function ParseIntSafely {
+function ParseLongSafely {
     param(
         [object]$value,
-        [int]$default=-1
+        [long]$default=-1
     )
 
-    [int]$int = 0
-    if (-not [int]::TryParse($value, [ref]$int)) {
-        $int = $default
+    [long]$long = 0
+    if (-not [long]::TryParse($value, [ref]$long)) {
+        $long = $default
     }
-    $int
+    $long
 }
 
 function AddReadOnlyProps {
