@@ -156,8 +156,11 @@ function BuildActionContextIssueMap {
     Write-Verbose "Building Action Context Issue"
 
     $context = Get-ActionContext
+    if ($context.Payload.issue) { $Number = $context.Payload.issue.number }
+    if ($context.Payload.pull_request) { $Number = $context.Payload.pull_request.number }
+    if ($context.Payload) { $Number = $context.Payload.number }
     (BuildActionContextRepoMap) + @{
-        Number = ($context.Payload.issue ?? $context.Payload.pull_request ?? $context.Payload).number
+        Number = $Number
     }
 }
 
