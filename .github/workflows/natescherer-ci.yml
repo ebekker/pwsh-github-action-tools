@@ -39,8 +39,8 @@ jobs:
       - name: pester tests manually
         id: pesterTests
         run: |
-          Write-Host $PSVersionTable.PSVersion.ToString()
-          
+          Write-Host "PowerShell version is $($PSVersionTable.PSVersion.ToString())"
+
           $modulesToInstall = @(
             'Pester'
             'functional'
