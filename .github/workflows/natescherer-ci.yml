@@ -69,9 +69,10 @@ jobs:
           Set-ActionOutput -Name result_clixml_path -Value $result_clixml_path
 
       - name: pester tests report
-        uses: zyborg/pester-tests-report@v1.3.0
+        uses: zyborg/pester-tests-report@v1
         with:
           test_results_path: ${{ steps.pesterTests.outputs.test_results_path }}
           result_clixml_path: ${{ steps.pesterTests.outputs.result_clixml_path }}
           report_name: TestResults_${{ runner.os }}_${{ matrix.shell }}
           report_title: PWSH GitHub Action Tools Tests
+          github_token: ${{ secrets.GITHUB_TOKEN }}
