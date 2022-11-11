@@ -39,7 +39,7 @@
             # IconUri = ''
 
             ## ReleaseNotes of this module
-            ReleaseNotes = 'https://github.com/ebekker/pwsh-github-action-base/releases/'
+            ReleaseNotes = 'https://github.com/ebekker/pwsh-github-action-tools/releases/'
         }
     }
 
