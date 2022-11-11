@@ -34,7 +34,19 @@ function recursiveEquality($a, $b) {
         if ($inequalKeys.Count) { Write-Verbose "Inequal PSCO Keys: $inequalKeys" }
         return $inequalKeys.Count -eq 0
     }
-    Write-Debug "test leaves '$a'($(($a ?? $NULL_INST).GetType().FullName)) '$b'($(($b ?? $NULL_INST).GetType().FullName))"
+    if ($a) {
+        $aFullName = $a.GetType().FullName
+    }
+    else {
+        $aFullName = $NULL_INST.GetType().FullName
+    }
+    if ($b) {
+        $bFullName = $b.GetType().FullName
+    }
+    else {
+        $bFullName = $NULL_INST.GetType().FullName
+    }
+    Write-Debug "test leaves '$a'($aFullName) '$b'($bFullName)"
 
     return (($null -eq $a -and $null -eq $b) -or ($null -ne $a -and $null -ne $b -and $a.GetType() -eq $b.GetType() -and $a -eq $b))
 }

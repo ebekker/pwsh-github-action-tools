@@ -10,55 +10,35 @@ on:
     types: published
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  test:
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        shell: [pwsh, powershell]
+        exclude:
+          - os: ubuntu-latest
+            shell: powershell
+          - os: macos-latest
+            shell: powershell
     
     steps:
     
       - name: checkout
         uses: actions/checkout@v1
 
-      - name: extract version base
-        id: extract_version_base
-        shell: pwsh
-        run: |
-          $mm = Test-ModuleManifest -Path ./GitHubActions/GitHubActions.psd1
-          $mv = $mm.Version
-          Write-Output "Got module manifest version: $mv"
-
-          $versionBase = "$($mv.Major).$($mv.Minor).$($mv.Build)"
-          Write-Output "Computed version base: $versionBase"
-          Write-Host "::set-output name=version_base::$versionBase"
-          Add-Content -Encoding utf8NoBOM -Path $env:GITHUB_ENV -Value "VERSION_BASE=$versionBase"
-
-      - name: compute build nums
-        uses: zyborg/gh-action-buildnum@v1
-        with:
-          gist_token: ${{ secrets.GIST_TOKEN }}
-          version_key: ${{ steps.extract_version_base.outputs.version_base }}
-          set_env: true
-
-      - name: update version build
-        shell: pwsh
-        run: |
-          $versBase = $env:VERSION_BASE
-          $buildNum = $env:BUILDNUM_FOR_VERSION
-          $versFull = "$($versBase).$($buildNum)"
-
-          Write-Output "Computed full version: $versFull"
-          Update-ModuleManifest -Path ./GitHubActions/GitHubActions.psd1 -ModuleVersion $versFull
-
-          ## Pull it back out to verify it was updated
-          $mm = Test-ModuleManifest -Path ./GitHubActions/GitHubActions.psd1
-          Write-Output "Updated module manifest with version: $($mm.Version)"
-
       ## We have to run the Pester tests manually because the `pester-tests-report` Action
       ## actually uses our GitHubActions module internally, and produces a conflict due to
       ## multiple same-named module scripts when the Action tries to run our tests itself
       - name: pester tests manually
         id: pesterTests
-        shell: pwsh
         run: |
+          Write-Host "PowerShell version is $($PSVersionTable.PSVersion.ToString())"
+
           $modulesToInstall = @(
             'Pester'
             'functional'
@@ -88,7 +68,7 @@ jobs:
           Set-ActionOutput -Name result_clixml_path -Value $result_clixml_path
 
       - name: pester tests report
-        uses: zyborg/pester-tests-report@v1.3.0
+        uses: zyborg/pester-tests-report@v1
         with:
           test_results_path: ${{ steps.pesterTests.outputs.test_results_path }}
           result_clixml_path: ${{ steps.pesterTests.outputs.result_clixml_path }}
@@ -98,6 +78,49 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           gist_token: ${{ secrets.GIST_TOKEN }}
           gist_badge_label: 'Tested @ %ExecutedAt%'
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+    
+      - name: checkout
+        uses: actions/checkout@v1
+
+      - name: extract version base
+        id: extract_version_base
+        shell: pwsh
+        run: |
+          $mm = Test-ModuleManifest -Path ./GitHubActions/GitHubActions.psd1
+          $mv = $mm.Version
+          Write-Output "Got module manifest version: $mv"
+
+          $versionBase = "$($mv.Major).$($mv.Minor).$($mv.Build)"
+          Write-Output "Computed version base: $versionBase"
+          "version_base=$versionBase" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
+          Add-Content -Encoding utf8NoBOM -Path $env:GITHUB_ENV -Value "VERSION_BASE=$versionBase"
+
+      - name: compute build nums
+        uses: zyborg/gh-action-buildnum@v1
+        with:
+          gist_token: ${{ secrets.GIST_TOKEN }}
+          version_key: ${{ steps.extract_version_base.outputs.version_base }}
+          set_env: true
+
+      - name: update version build
+        shell: pwsh
+        run: |
+          $versBase = $env:VERSION_BASE
+          $buildNum = $env:BUILDNUM_FOR_VERSION
+          $versFull = "$($versBase).$($buildNum)"
+
+          Write-Output "Computed full version: $versFull"
+          Update-ModuleManifest -Path ./GitHubActions/GitHubActions.psd1 -ModuleVersion $versFull
+
+          ## Pull it back out to verify it was updated
+          $mm = Test-ModuleManifest -Path ./GitHubActions/GitHubActions.psd1
+          Write-Output "Updated module manifest with version: $($mm.Version)"
 
       - name: publish to myget
         shell: pwsh
@@ -123,7 +146,7 @@ jobs:
 
   publish:
     runs-on: ubuntu-latest
-    needs: build
+    needs: [test, build]
     if: github.event_name == 'release'
     
     steps:

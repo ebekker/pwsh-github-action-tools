@@ -123,10 +123,10 @@ Describe 'Get-ActionInputs' {
     }
 }
 
-Describe 'Set-ActionOuput' {
+Describe 'Set-ActionOutput' {
     It 'Given a valid -Name and -Value' {
-        $output = Set-ActionOutput 'foo_bar' 'foo bar value'
-        $output | Should -Be "::set-output name=foo_bar::foo bar value$EOL"
+        Set-ActionOutput 'foo_bar' 'foo bar value'
+        $env:GITHUB_OUTPUT | Should -FileContentMatch "foo_bar=foo bar value"
     }
 }
 

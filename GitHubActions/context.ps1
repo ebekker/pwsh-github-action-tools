@@ -82,6 +82,49 @@ function Get-ActionIssue {
     $issue
 }
 
+# From https://4sysops.com/archives/convert-json-to-a-powershell-hash-table/, added for Windows PowerShell compatability
+function ConvertTo-Hashtable {
+    [CmdletBinding()]
+    [OutputType('hashtable')]
+    param (
+        [Parameter(ValueFromPipeline)]
+        $InputObject
+    )
+    process {
+        ## Return null if the input is null. This can happen when calling the function
+        ## recursively and a property is null
+        if ($null -eq $InputObject) {
+            return $null
+        }
+        ## Check if the input is an array or collection. If so, we also need to convert
+        ## those types into hash tables as well. This function will convert all child
+        ## objects into hash tables (if applicable)
+        if ($InputObject -is [System.Collections.IEnumerable] -and $InputObject -isnot [string]) {
+            $collection = @(
+                foreach ($object in $InputObject) {
+                    ConvertTo-Hashtable -InputObject $object
+                }
+            )
+            ## Return the array but don't enumerate it because the object may be pretty complex
+            Write-Output -NoEnumerate $collection
+        }
+        elseif ($InputObject -is [psobject]) {
+            ## If the object has properties that need enumeration
+            ## Convert it to its own hash table and return it
+            $hash = @{}
+            foreach ($property in $InputObject.PSObject.Properties) {
+                $hash[$property.Name] = ConvertTo-Hashtable -InputObject $property.Value
+            }
+            $hash
+        }
+        else {
+            ## If the object isn't an array, collection, or other object, it's already a hash table
+            ## So just return it.
+            $InputObject
+        }
+    }
+}
+
 function BuildActionContextMap {
     [CmdletBinding()]
     param()
@@ -94,7 +137,7 @@ function BuildActionContextMap {
         if (Test-Path -PathType Leaf $path) {
             ## Webhook payload object that triggered the workflow
             $payload = (Get-Content -Raw $path -Encoding utf8) |
-                ConvertFrom-Json -AsHashtable
+                ConvertFrom-Json | ConvertTo-Hashtable
         }
         else {
             Write-Warning "`GITHUB_EVENT_PATH` [$path] does not eixst"
@@ -111,8 +154,8 @@ function BuildActionContextMap {
         Action = $env:GITHUB_ACTION
         Actor = $env:GITHUB_ACTOR
         Job = $env:GITHUB_JOB
-        RunNumber = ParseIntSafely $env:GITHUB_RUN_NUMBER
-        RunId = ParseIntSafely $env:GITHUB_RUN_ID
+        RunNumber = ParseLongSafely $env:GITHUB_RUN_NUMBER
+        RunId = ParseLongSafely $env:GITHUB_RUN_ID
 
         Payload = $payload
     }
@@ -156,22 +199,25 @@ function BuildActionContextIssueMap {
     Write-Verbose "Building Action Context Issue"
 
     $context = Get-ActionContext
+    if ($context.Payload.issue) { $Number = $context.Payload.issue.number }
+    if ($context.Payload.pull_request) { $Number = $context.Payload.pull_request.number }
+    if ($context.Payload) { $Number = $context.Payload.number }
     (BuildActionContextRepoMap) + @{
-        Number = ($context.Payload.issue ?? $context.Payload.pull_request ?? $context.Payload).number
+        Number = $Number
     }
 }
 
-function ParseIntSafely {
+function ParseLongSafely {
     param(
         [object]$value,
-        [int]$default=-1
+        [long]$default=-1
     )
 
-    [int]$int = 0
-    if (-not [int]::TryParse($value, [ref]$int)) {
-        $int = $default
+    [long]$long = 0
+    if (-not [long]::TryParse($value, [ref]$long)) {
+        $long = $default
     }
-    $int
+    $long
 }
 
 function AddReadOnlyProps {

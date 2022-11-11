@@ -148,9 +148,7 @@ function Set-ActionOutput {
         [string]$Value
     )
 
-    Send-ActionCommand set-output @{
-        name = $Name
-    } -Message $Value
+    "$Name=$Value" | Out-File -FilePath $env:GITHUB_OUTPUT -Encoding utf8 -Append
 }
 
 <#
@@ -375,10 +373,10 @@ function Write-ActionEnvVariable {
 
     if ($Multiline) {
         $delim = [Guid]::NewGuid().ToString().Replace('-', '')
-        Add-Content -Encoding utf8NoBOM -Path $env:GITHUB_ENV -Value "$($Name)<<$($delim)`n$($Value)`n$($delim)"
+        Add-Content -Encoding utf8 -Path $env:GITHUB_ENV -Value "$($Name)<<$($delim)`n$($Value)`n$($delim)"
     }
     else {
-        Add-Content -Encoding utf8NoBOM -Path $env:GITHUB_ENV -Value "$($Name)=$($Value)"
+        Add-Content -Encoding utf8 -Path $env:GITHUB_ENV -Value "$($Name)=$($Value)"
     }
 }
 
@@ -388,7 +386,7 @@ function Write-ActionEnvPath {
         [string]$Path
     )
 
-    Add-Content -Encoding utf8NoBOM -Path $env:GITHUB_PATH -Value $Path
+    Add-Content -Encoding utf8 -Path $env:GITHUB_PATH -Value $Path
 }
 
 function ConvertTo-EscapedData {
